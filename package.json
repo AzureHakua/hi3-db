@@ -17,5 +17,5 @@
     "bun-types": "latest",
     "drizzle-kit": "^0.24.2"
   },
-  "module": "src/index.js"
+  "module": "src/index.tsx"
 }
