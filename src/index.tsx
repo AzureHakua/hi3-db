@@ -5,6 +5,7 @@ import { db } from './db';
 import { eq, and } from 'drizzle-orm';
 import { stigmata, SelectStigmata } from './db/schema';
 
+
 new Elysia()
   .use(html())
   .use(swagger())
@@ -44,8 +45,10 @@ new Elysia()
         // Query by name and position
         data = await db.select().from(stigmata).where(and(eq(stigmata.name, query.name), eq(stigmata.pos, query.pos)));
     } else if (query.name) {
+        // Query by name (display all in that position)
         data = await db.select().from(stigmata).where(eq(stigmata.name, query.name));
     } else {
+        // No query, display all stigmata
         data = await db.select().from(stigmata).all();
     }
 
@@ -70,11 +73,12 @@ new Elysia()
    * @param {Object} body - The stigmata data.
    */
   .post('/stigmata', async ({ body }) => {
-    if (body.name.length === 0)   {
+    // Input validation: Both name and pos are required.
+    if (body.name.length === 0 || body.pos.length === 0)   {
       throw new Error('Content cannot be empty');
     }
     const newStigma = await db.insert(stigmata).values(body).returning().get();
-    return <StigmaSingle { ... newStigma } />;
+    return <Stigma { ... newStigma } />;
   }, {
       body: t.Object({
         name: t.String(),
@@ -96,7 +100,7 @@ new Elysia()
    */
   .patch('/stigmata/:id', async ({ params, body }) => {
     const updatedStigma = await db.update(stigmata).set(body).where(eq(stigmata.id, params.id)).returning().get();
-    return <StigmaSingle { ...updatedStigma } />;
+    return <Stigma { ...updatedStigma } />;
   }, {
     params: t.Object({
       id: t.Numeric(),
@@ -129,7 +133,7 @@ new Elysia()
   .listen(3000)
 
 
-function StigmaSingle({ name, pos, id }: SelectStigmata) {
+function Stigma({ name, pos, id }: SelectStigmata) {
   return (
     <div>
       <p>{name} : {pos} : {id}</p>
@@ -142,7 +146,7 @@ function StigmataList({ stigmata }: { stigmata: SelectStigmata[] }) {
   return (
     <div>
       {stigmata.map((stigma) => (
-        <StigmaSingle {...stigma} />
+        <Stigma {...stigma} />
       ))}
     </div>
   );
