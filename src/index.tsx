@@ -39,17 +39,17 @@ new Elysia()
     let data;
 
     if (query.id) {
-        // Query by ID
-        data = await db.select().from(stigmata).where(eq(stigmata.id, Number(query.id)));
+      // Query by ID
+      data = await db.select().from(stigmata).where(eq(stigmata.id, Number(query.id)));
     } else if (query.name && query.pos) {
-        // Query by name and position
-        data = await db.select().from(stigmata).where(and(eq(stigmata.name, query.name), eq(stigmata.pos, query.pos)));
+      // Query by name and position
+      data = await db.select().from(stigmata).where(and(eq(stigmata.name, query.name), eq(stigmata.pos, query.pos)));
     } else if (query.name) {
-        // Query by name (display all in that position)
-        data = await db.select().from(stigmata).where(eq(stigmata.name, query.name));
+      // Query by name (display all in that position)
+      data = await db.select().from(stigmata).where(eq(stigmata.name, query.name));
     } else {
-        // No query, display all stigmata
-        data = await db.select().from(stigmata).all();
+      // No query, display all stigmata
+      data = await db.select().from(stigmata).all();
     }
 
     return <StigmataList stigmata={data} />;
@@ -74,20 +74,20 @@ new Elysia()
    */
   .post('/stigmata', async ({ body }) => {
     // Input validation: Both name and pos are required.
-    if (body.name.length === 0 || body.pos.length === 0)   {
+    if (body.name.length === 0 || body.pos.length === 0) {
       throw new Error('Content cannot be empty');
     }
     const newStigma = await db.insert(stigmata).values(body).returning().get();
-    return <Stigma { ... newStigma } />;
+    return <Stigma {...newStigma} />;
   }, {
-      body: t.Object({
-        name: t.String(),
-        img: t.String(),
-        pos: t.String(),
-        eff: t.String(),
-        p2: t.String(),
-        p3: t.String(),
-      })
+    body: t.Object({
+      name: t.String(),
+      img: t.String(),
+      pos: t.String(),
+      eff: t.String(),
+      p2: t.String(),
+      p3: t.String(),
+    })
   })
 
 
@@ -100,7 +100,7 @@ new Elysia()
    */
   .patch('/stigmata/:id', async ({ params, body }) => {
     const updatedStigma = await db.update(stigmata).set(body).where(eq(stigmata.id, params.id)).returning().get();
-    return <Stigma { ...updatedStigma } />;
+    return <Stigma {...updatedStigma} />;
   }, {
     params: t.Object({
       id: t.Numeric(),
@@ -125,9 +125,9 @@ new Elysia()
   .delete('/stigmata/:id', async ({ params }) => {
     await db.delete(stigmata).where(eq(stigmata.id, params.id)).run();
   }, {
-      params: t.Object({
-        id: t.Numeric(),
-      })
+    params: t.Object({
+      id: t.Numeric(),
+    })
   })
 
   .listen(3000)
