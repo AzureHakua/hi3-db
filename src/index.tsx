@@ -23,7 +23,7 @@ const app = new Elysia()
       />
     </html>
   ))
-  .get('/stigmata-list', async () => {
+  .get('/stigmata', async () => {
     try {
       const stigmata = await getStigmata({ query: {} })
       return <StigmataList stigmata={stigmata} />
