@@ -6,6 +6,7 @@
     "dev": "bun run --watch src/index.tsx"
   },
   "dependencies": {
+    "@elysiajs/cors": "^1.1.0",
     "@elysiajs/html": "^1.1.0",
     "@elysiajs/swagger": "^1.1.1",
     "@libsql/client": "^0.10.0",
