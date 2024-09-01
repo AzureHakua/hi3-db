@@ -10,6 +10,14 @@ if (!API_KEY) {
   process.exit(1)
 }
 
+
+/**
+ * Checks if the provided authorization header contains a valid API key.
+ * @param {Object} params - The parameters object.
+ * @param {Object} params.headers - The request headers.
+ * @param {string} params.headers.authorization - The authorization header.
+ * @throws {Error} If the authorization header is missing, invalid, or contains an invalid API key.
+ */
 const checkAuth = ({ headers }: { headers: { authorization: string } }) => {
   if (!headers.authorization || !headers.authorization.startsWith('Bearer ')) {
     throw new Error('Missing or invalid Authorization header')
@@ -20,6 +28,13 @@ const checkAuth = ({ headers }: { headers: { authorization: string } }) => {
   }
 }
 
+
+/**
+ * Retrieves stigmata based on the provided query parameters.
+ * @param {Object} params - The parameters object.
+ * @param {Object} params.query - The query parameters for filtering stigmata.
+ * @returns {Promise<SelectStigmata[]>} A promise that resolves to an array of stigmata.
+ */
 export const getStigmata = async ({ query }: { query: any }): Promise<SelectStigmata[]> => {
   console.log('getStigmata called with query:', query)
   let data;
@@ -37,6 +52,13 @@ export const getStigmata = async ({ query }: { query: any }): Promise<SelectStig
   return data;
 }
 
+
+/**
+ * Creates a new stigmata entry.
+ * @param {Object} params - The parameters object.
+ * @param {InsertStigmata} params.body - The stigmata data to insert.
+ * @returns {Promise<SelectStigmata>} A promise that resolves to the created stigmata.
+ */
 export const postStigmata = async ({ body }: { body: InsertStigmata }): Promise<SelectStigmata> => {
   console.log('postStigmata called');
   if (body.name.length === 0 || body.pos.length === 0) {
@@ -46,19 +68,42 @@ export const postStigmata = async ({ body }: { body: InsertStigmata }): Promise<
   return newStigma;
 }
 
+
+/**
+ * Updates an existing stigmata entry.
+ * @param {Object} params - The parameters object.
+ * @param {number} params.params.id - The ID of the stigmata to update.
+ * @param {Partial<InsertStigmata>} params.body - The updated stigmata data.
+ * @returns {Promise<SelectStigmata>} A promise that resolves to the updated stigmata.
+ */
 export const patchStigmata = async ({ params, body }: { params: { id: number }, body: Partial<InsertStigmata> }): Promise<SelectStigmata> => {
   console.log('patchStigmata called', params);
   const updatedStigma = await db.update(stigmata).set(body).where(eq(stigmata.id, params.id)).returning().get();
   return updatedStigma;
 }
 
+
+/**
+ * Deletes a stigmata entry.
+ * @param {Object} params - The parameters object.
+ * @param {number} params.params.id - The ID of the stigmata to delete.
+ * @returns {Promise<{ success: boolean }>} A promise that resolves to an object indicating the success of the operation.
+ */
 export const deleteStigmata = async ({ params }: { params: { id: number } }): Promise<{ success: boolean }> => {
   console.log('deleteStigmata called', params);
   await db.delete(stigmata).where(eq(stigmata.id, params.id)).run();
   return { success: true };
 }
 
+
+/**
+ * Defines the routes for stigmata operations.
+ */
 export const stigmataRoutes = new Elysia({ prefix: '/api' })
+  /**
+   * GET /api/stigmata
+   * Retrieves stigmata based on query parameters.
+   */
   .get('/stigmata', getStigmata, {
     query: t.Object({
       id: t.Optional(t.Numeric()),
@@ -69,6 +114,10 @@ export const stigmataRoutes = new Elysia({ prefix: '/api' })
       p3: t.Optional(t.String()),
     }),
   })
+  /**
+   * POST /api/stigmata
+   * Creates a new stigmata entry. Requires authentication.
+   */
   .post('/stigmata', ({ body, headers }) => {
     checkAuth({ headers })
     return postStigmata({ body })
@@ -85,6 +134,10 @@ export const stigmataRoutes = new Elysia({ prefix: '/api' })
       authorization: t.String()
     })
   })
+  /**
+   * PATCH /api/stigmata/:id
+   * Updates an existing stigmata entry. Requires authentication.
+   */
   .patch('/stigmata/:id', ({ params, body, headers }) => {
     checkAuth({ headers })
     return patchStigmata({ params, body })
@@ -104,6 +157,10 @@ export const stigmataRoutes = new Elysia({ prefix: '/api' })
       authorization: t.String()
     })
   })
+   /**
+   * DELETE /api/stigmata/:id
+   * Deletes a stigmata entry. Requires authentication.
+   */
   .delete('/stigmata/:id', ({ params, headers }) => {
     checkAuth({ headers })
     return deleteStigmata({ params })
