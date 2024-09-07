@@ -155,6 +155,7 @@ export const postStigmata = async ({ body }: { body: any }) => {
   return newStigma;
 }
 
+
 /**
  * Updates an existing stigmata entry.
  * @param {Object} params.body - The request body.
