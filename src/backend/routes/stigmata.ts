@@ -1,6 +1,6 @@
 import { Elysia, t } from 'elysia'
 import { db } from '../db'
-import { stigmata, SelectStigmata, InsertStigmata } from '../db/schema'
+import { stigmata, positions, stats, images, setEffects, InsertStigmata } from '../db/schema'
 import { eq, and } from 'drizzle-orm'
 
 const API_KEY = process.env.API_KEY
@@ -9,6 +9,11 @@ if (!API_KEY) {
   console.error('API_KEY is not set in environment variables')
   process.exit(1)
 }
+
+/**
+ * ! When dealing with the Stigmata, please note that Stigma is singular and Stigmata is plural.
+ *   Please use Stigmata whenever possible to avoid confusion unless there is a specific reason to use Stigma.
+ */
 
 
 /**
@@ -31,67 +36,253 @@ const checkAuth = ({ headers }: { headers: { authorization: string } }) => {
 
 /**
  * Retrieves stigmata based on the provided query parameters.
- * @param {Object} params - The parameters object.
- * @param {Object} params.query - The query parameters for filtering stigmata.
- * @returns {Promise<SelectStigmata[]>} A promise that resolves to an array of stigmata.
+ * @param {Object} params.query - The query parameters.
+ * @returns {Array} An array of stigmata objects.
  */
-export const getStigmata = async ({ query }: { query: any }): Promise<SelectStigmata[]> => {
+export const getStigmata = async ({ query }: { query: any }) => {
   console.log('getStigmata called with query:', query)
-  let data;
+  let stigmataData;
 
   if (query.id) {
-    data = await db.select().from(stigmata).where(eq(stigmata.id, Number(query.id)));
+    // If 'id' is provided, fetch the stigmata with the given ID
+    stigmataData = await db.select().from(stigmata).where(eq(stigmata.id, Number(query.id)));
   } else if (query.name && query.pos) {
-    data = await db.select().from(stigmata).where(and(eq(stigmata.name, query.name), eq(stigmata.pos, query.pos)));
+    // If 'name' and 'pos' are provided, fetch the stigmata with the given name and position
+    stigmataData = await db
+      .select({
+        id: stigmata.id,
+        name: stigmata.name,
+      })
+      .from(stigmata)
+      .innerJoin(positions, eq(positions.stigmataId, stigmata.id))
+      .where(and(
+        eq(stigmata.name, query.name),
+        eq(positions.position, query.pos)
+      ));
   } else if (query.name) {
-    data = await db.select().from(stigmata).where(eq(stigmata.name, query.name));
+    // If 'name' is provided, fetch the stigmata with the given name
+    stigmataData = await db.select().from(stigmata).where(eq(stigmata.name, query.name));
   } else {
-    data = await db.select().from(stigmata).all();
+    // If no specific query parameters are provided, fetch all stigmata
+    stigmataData = await db.select().from(stigmata).all();
   }
 
-  return data;
+  // Fetch related data for each stigmata
+  const fullData = await Promise.all(stigmataData.map(async (s) => {
+    let positionsData;
+    if (query.name && query.pos) {
+      // If both name and position are specified, we've already filtered positions
+      positionsData = await db.select().from(positions)
+        .where(and(
+          eq(positions.stigmataId, s.id),
+          eq(positions.position, query.pos)
+        ));
+    } else {
+      // Otherwise, get all positions
+      positionsData = await db.select().from(positions).where(eq(positions.stigmataId, s.id));
+    }
+
+    const positionsWithStats = await Promise.all(positionsData.map(async (p) => {
+      const statsData = await db.select().from(stats).where(eq(stats.positionId, p.id));
+      return { ...p, stats: statsData[0] };
+    }));
+
+    const imagesData = await db.select().from(images).where(eq(images.stigmataId, s.id));
+    const setEffectsData = await db.select().from(setEffects).where(eq(setEffects.stigmataId, s.id));
+
+    return {
+      ...s,
+      positions: positionsWithStats,
+      images: imagesData,
+      setEffects: setEffectsData[0],
+    };
+  }));
+
+  return fullData;
 }
 
 
 /**
  * Creates a new stigmata entry.
- * @param {Object} params - The parameters object.
- * @param {InsertStigmata} params.body - The stigmata data to insert.
- * @returns {Promise<SelectStigmata>} A promise that resolves to the created stigmata.
+ * @param {Object} params.body - The request body.
+ * @returns {Object} The created stigmata object.
  */
-export const postStigmata = async ({ body }: { body: InsertStigmata }): Promise<SelectStigmata> => {
+export const postStigmata = async ({ body }: { body: any }) => {
   console.log('postStigmata called');
-  if (body.name.length === 0 || body.pos.length === 0) {
-    throw new Error('Content cannot be empty');
+  if (!body.name) {
+    throw new Error('Stigmata name is required');
   }
-  const newStigma = await db.insert(stigmata).values(body).returning().get();
+
+  const newStigma = await db.transaction(async (tx) => {
+    const stigmataResult = await tx.insert(stigmata).values({ name: body.name }).returning().get();
+
+    if (body.positions) {
+      for (const pos of body.positions) {
+        const positionResult = await tx.insert(positions).values({
+          stigmataId: stigmataResult.id,
+          position: pos.position,
+          name: pos.name,
+          skillName: pos.skillName,
+          skillDescription: pos.skillDescription,
+        }).returning().get();
+
+        if (pos.stats) {
+          await tx.insert(stats).values({
+            positionId: positionResult.id,
+            ...pos.stats,
+          });
+        }
+      }
+    }
+
+    if (body.images) {
+      await tx.insert(images).values(body.images.map((img: any) => ({
+        stigmataId: stigmataResult.id,
+        ...img,
+      })));
+    }
+
+    if (body.setEffects) {
+      await tx.insert(setEffects).values({
+        stigmataId: stigmataResult.id,
+        ...body.setEffects,
+      });
+    }
+
+    return stigmataResult;
+  });
+
   return newStigma;
 }
 
-
 /**
  * Updates an existing stigmata entry.
- * @param {Object} params - The parameters object.
- * @param {number} params.params.id - The ID of the stigmata to update.
- * @param {Partial<InsertStigmata>} params.body - The updated stigmata data.
- * @returns {Promise<SelectStigmata>} A promise that resolves to the updated stigmata.
+ * @param {Object} params.body - The request body.
+ * @returns {Object} The updated stigmata object.
  */
-export const patchStigmata = async ({ params, body }: { params: { id: number }, body: Partial<InsertStigmata> }): Promise<SelectStigmata> => {
+export const patchStigmata = async ({ params, body }: { params: { id: number }, body: any }) => {
   console.log('patchStigmata called', params);
-  const updatedStigma = await db.update(stigmata).set(body).where(eq(stigmata.id, params.id)).returning().get();
-  return updatedStigma;
+  // Check if the stigmata exists
+  return await db.transaction(async (tx) => {
+    const stigmataResult = await tx.select().from(stigmata).where(eq(stigmata.id, params.id)).get();
+    if (!stigmataResult) {
+      throw new Error('Stigmata not found');
+    }
+
+    if (body.name) {
+      await tx.update(stigmata).set({ name: body.name }).where(eq(stigmata.id, params.id));
+    }
+
+    if (body.positions) {
+      const positionsToUpdate = Array.isArray(body.positions) ? body.positions : [body.positions];
+
+      for (const pos of positionsToUpdate) {
+        const existingPosition = await tx.select()
+          .from(positions)
+          .where(and(
+            eq(positions.stigmataId, params.id),
+            eq(positions.position, pos.position)
+          ))
+          .get();
+
+        if (existingPosition) {
+          await tx.update(positions)
+            .set({
+              name: pos.name,
+              skillName: pos.skill_name,
+              skillDescription: pos.skill_description,
+            })
+            .where(eq(positions.id, existingPosition.id));
+
+          if (pos.stats) {
+            await tx.update(stats)
+              .set({
+                hp: Number(pos.stats.HP),
+                atk: Number(pos.stats.ATK),
+                def: Number(pos.stats.DEF),
+                crt: Number(pos.stats.CRT),
+                sp: Number(pos.stats.SP),
+              })
+              .where(eq(stats.positionId, existingPosition.id));
+          }
+        } else {
+          const newPosition = await tx.insert(positions)
+            .values({
+              stigmataId: params.id,
+              position: pos.position,
+              name: pos.name,
+              skillName: pos.skill_name,
+              skillDescription: pos.skill_description,
+            })
+            .returning()
+            .get();
+
+          if (pos.stats) {
+            await tx.insert(stats)
+              .values({
+                positionId: newPosition.id,
+                hp: Number(pos.stats.HP),
+                atk: Number(pos.stats.ATK),
+                def: Number(pos.stats.DEF),
+                crt: Number(pos.stats.CRT),
+                sp: Number(pos.stats.SP),
+              });
+          }
+        }
+      }
+    }
+
+    if (body.images) {
+      const imagesToUpdate = Array.isArray(body.images) ? body.images : [body.images];
+
+      for (const img of imagesToUpdate) {
+        await tx.delete(images)
+          .where(and(
+            eq(images.stigmataId, params.id),
+            eq(images.position, img.position)
+          ));
+
+        await tx.insert(images)
+          .values({
+            stigmataId: params.id,
+            position: img.position,
+            iconUrl: img.icon,
+            bigUrl: img.big,
+          });
+      }
+    }
+
+    if (body.set) {
+      await tx.update(setEffects)
+        .set({
+          setName: body.set.name,
+          twoPieceName: body.set["2_piece"]?.name,
+          twoPieceEffect: body.set["2_piece"]?.effect,
+          threePieceName: body.set["3_piece"]?.name,
+          threePieceEffect: body.set["3_piece"]?.effect,
+        })
+        .where(eq(setEffects.stigmataId, params.id));
+    }
+
+    return await tx.select().from(stigmata).where(eq(stigmata.id, params.id)).get();
+  });
 }
 
 
 /**
  * Deletes a stigmata entry.
- * @param {Object} params - The parameters object.
- * @param {number} params.params.id - The ID of the stigmata to delete.
- * @returns {Promise<{ success: boolean }>} A promise that resolves to an object indicating the success of the operation.
+ * @param {Object} params.id - The ID of the stigmata to delete.
+ * @returns {Object} The success message.
  */
-export const deleteStigmata = async ({ params }: { params: { id: number } }): Promise<{ success: boolean }> => {
+export const deleteStigmata = async ({ params }: { params: { id: number } }) => {
   console.log('deleteStigmata called', params);
-  await db.delete(stigmata).where(eq(stigmata.id, params.id)).run();
+  await db.transaction(async (tx) => {
+    await tx.delete(stats).where(eq(stats.positionId, tx.select({ id: positions.id }).from(positions).where(eq(positions.stigmataId, params.id))));
+    await tx.delete(positions).where(eq(positions.stigmataId, params.id));
+    await tx.delete(images).where(eq(images.stigmataId, params.id));
+    await tx.delete(setEffects).where(eq(setEffects.stigmataId, params.id));
+    await tx.delete(stigmata).where(eq(stigmata.id, params.id));
+  });
   return { success: true };
 }
 
@@ -109,9 +300,6 @@ export const stigmataRoutes = new Elysia({ prefix: '/api' })
       id: t.Optional(t.Numeric()),
       name: t.Optional(t.String()),
       pos: t.Optional(t.String()),
-      eff: t.Optional(t.String()),
-      p2: t.Optional(t.String()),
-      p3: t.Optional(t.String()),
     }),
   })
   /**
@@ -124,11 +312,31 @@ export const stigmataRoutes = new Elysia({ prefix: '/api' })
   }, {
     body: t.Object({
       name: t.String(),
-      img: t.String(),
-      pos: t.String(),
-      eff: t.String(),
-      p2: t.String(),
-      p3: t.String(),
+      positions: t.Optional(t.Array(t.Object({
+        position: t.String(),
+        name: t.String(),
+        skillName: t.String(),
+        skillDescription: t.String(),
+        stats: t.Object({
+          hp: t.Optional(t.Number()),
+          atk: t.Optional(t.Number()),
+          def: t.Optional(t.Number()),
+          crt: t.Optional(t.Number()),
+          sp: t.Optional(t.Number()),
+        }),
+      }))),
+      images: t.Array(t.Object({
+        position: t.String(),
+        iconUrl: t.String(),
+        bigUrl: t.String(),
+      })),
+      setEffects: t.Optional(t.Object({
+        setName: t.Optional(t.String()),
+        twoPieceName: t.Optional(t.String()),
+        twoPieceEffect: t.Optional(t.String()),
+        threePieceName: t.Optional(t.String()),
+        threePieceEffect: t.Optional(t.String()),
+      })),
     }),
     headers: t.Object({
       authorization: t.String()
@@ -147,20 +355,41 @@ export const stigmataRoutes = new Elysia({ prefix: '/api' })
     }),
     body: t.Object({
       name: t.Optional(t.String()),
-      img: t.Optional(t.String()),
-      pos: t.Optional(t.String()),
-      eff: t.Optional(t.String()),
-      p2: t.Optional(t.String()),
-      p3: t.Optional(t.String()),
+      positions: t.Optional(t.Array(t.Object({
+        id: t.Optional(t.Number()),
+        position: t.String(),
+        name: t.String(),
+        skillName: t.Optional(t.String()),
+        skillDescription: t.Optional(t.String()),
+        stats: t.Optional(t.Object({
+          hp: t.Optional(t.Number()),
+          atk: t.Optional(t.Number()),
+          def: t.Optional(t.Number()),
+          crt: t.Optional(t.Number()),
+          sp: t.Optional(t.Number()),
+        })),
+      }))),
+      images: t.Optional(t.Array(t.Object({
+        position: t.String(),
+        iconUrl: t.Optional(t.String()),
+        bigUrl: t.Optional(t.String()),
+      }))),
+      setEffects: t.Optional(t.Object({
+        setName: t.Optional(t.String()),
+        twoPieceName: t.Optional(t.String()),
+        twoPieceEffect: t.Optional(t.String()),
+        threePieceName: t.Optional(t.String()),
+        threePieceEffect: t.Optional(t.String()),
+      })),
     }),
     headers: t.Object({
       authorization: t.String()
     })
   })
-   /**
-   * DELETE /api/stigmata/:id
-   * Deletes a stigmata entry. Requires authentication.
-   */
+  /**
+  * DELETE /api/stigmata/:id
+  * Deletes a stigmata entry. Requires authentication.
+  */
   .delete('/stigmata/:id', ({ params, headers }) => {
     checkAuth({ headers })
     return deleteStigmata({ params })
