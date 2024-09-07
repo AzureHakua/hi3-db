@@ -17,7 +17,7 @@ const app = new Elysia()
         <script src="https://unpkg.com/htmx.org@2.0.2"></script>
       </head>
       <body
-        hx-get='/api/stigmata'
+        hx-get='/stigmata'
         hx-trigger='load'
         hx-swap='innerHTML'
       />
