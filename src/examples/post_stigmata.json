@@ -1,0 +1,100 @@
+{
+  "Single Stigmata Post":
+  {
+    "name": "\"Lantern\": Clean-up",
+    "positions": [
+      {
+        "position": "B",
+        "name": "\"Lantern\": Clean-up (B)",
+        "skillName": "Resting in the Shadows",
+        "skillDescription": "Move Speed increases by 10.0% during Stellar Outburst.",
+        "stats": {
+          "hp": 261,
+          "atk": 26,
+          "def": 41,
+          "crt": 6,
+          "sp": 0
+        }
+      }
+    ],
+    "images": [
+      {
+        "position": "B",
+        "iconUrl": "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/5/52/%22Lantern%22_-_Clean-up_%28B%29_%28Icon%29.png/revision/latest?cb=20240413190701",
+        "bigUrl": "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/5/5e/%22Lantern%22_-_Clean-up_%28B%29.png/revision/latest?cb=20240413190739"
+      }
+    ],
+    "setEffects": {}
+  },
+
+
+  "All Positions Post":
+  {
+    "name": "\"Lantern\": Guardian",
+    "positions": [
+      {
+        "position": "T",
+        "name": "\"Lantern\": Guardian (T)",
+        "skillName": "Protect the Serene Night",
+        "skillDescription": "The character deals 25.0% more Fire DMG. When equipped by Lone Destruction: Shadowchaser, enemies take 23.0% more Fire DMG from her. If she has Hanging Flame, she receives the following effect:● All enemies on the field take 9.0% more Elemental DMG from the team.",
+        "stats": {
+          "hp": 371,
+          "atk": 113,
+          "def": 41,
+          "crt": 77,
+          "sp": 0
+        }
+      },
+      {
+        "position": "M",
+        "name": "\"Lantern\": Guardian (M)",
+        "skillName": "May the Faint Light Shine Eternal",
+        "skillDescription": "The character deals 25.0% more Total DMG. When equipped by Lone Destruction: Shadowchaser with Hanging Flame, she receives the following effect:● When Astral Ring Specialization: World Star is activated, enemies take 30.0% more Total DMG through Resonance when Lone Destruction: Shadowchaser is on the field.● The character deals 35.0% more Fire DMG when Astral Ring is not activated.",
+        "stats": {
+          "hp": 434,
+          "atk": 0,
+          "def": 236,
+          "crt": 8,
+          "sp": 0
+        }
+      },
+      {
+        "position": "B",
+        "name": "\"Lantern\": Guardian (B)",
+        "skillName": "Obliterate Disasters and Misery",
+        "skillDescription": "The character's Ranged ATKs deal 30.0% more Total DMG. When equipped by Lone Destruction: Shadowchaser with Hanging Flame, she receives the following effects:● She deals 68.0% more Fire DMG when Astral Ring is not activated.● When Astral Ring is activated, all other characters on the team deal 20.0% more Total DMG.",
+        "stats": {
+          "hp": 388,
+          "atk": 59,
+          "def": 86,
+          "crt": 13,
+          "sp": 0
+        }
+      }
+    ],
+    "images": [
+      {
+        "position": "T",
+        "iconUrl": "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/8/8e/%22Lantern%22_-_Guardian_%28T%29_%28Icon%29.png/revision/latest?cb=20240527103108",
+        "bigUrl": "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/3/34/%22Lantern%22_-_Guardian_%28T%29.png/revision/latest?cb=20240527103257"
+      },
+      {
+        "position": "M",
+        "iconUrl": "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/b/b7/%22Lantern%22_-_Guardian_%28M%29_%28Icon%29.png/revision/latest?cb=20240527103129",
+        "bigUrl": "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/c/cd/%22Lantern%22_-_Guardian_%28M%29.png/revision/latest?cb=20240527103318"
+      },
+      {
+        "position": "B",
+        "iconUrl": "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/3/39/%22Lantern%22_-_Guardian_%28B%29_%28Icon%29.png/revision/latest?cb=20240527103146",
+        "bigUrl": "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/0/06/%22Lantern%22_-_Guardian_%28B%29.png/revision/latest?cb=20240527103336"
+      }
+    ],
+    "setEffects": {
+      "setName": "A Forged Light",
+      "twoPieceName": "Guardian's Weapons",
+      "twoPieceEffect": "The character's Ultimate deals 30.0% more Total DMG. When equipped by Lone Destruction: Shadowchaser with Hanging Flame, she receives the following effect:● When Astral Ring Specialization: Resonance is activated, she deals 20.0% more Fire DMG during Stellar Outburst, all enemies on the field take 34% more Total DMG, and all characters on the team deal 5% more Physical DMG and Crit DMG.",
+      "threePieceName": "Fluorescent Night",
+      "threePieceEffect": "The character deals 25.0% more Fire DMG.When equipped by Lone Destruction: Shadowchaser, she receives the following effects:● Entering Stellar Outburst or dealing DMG on the field will grant Hanging Flame. Hanging Flame allows the character to deal 22.0% more Fire DMG for 25s. Retriggering refreshes the duration.● When Astral Ring Specialization: Wheel of Destiny is activated, enemies take 29.0% more Total DMG from team members with Harmonized Shadow Star tag in Astral Ring Charging state, and characters with Harmonized Shadow Star tag will deal 30% more Crit DMG.● When Astral Ring Specialization: World Star is activated, the character deals 30% more Total DMG through Resonance. Enemies take 25% more Total DMG and Fire DMG from characters protected by Astral Ring Specialization: World Star. Additionally, in Astral Ring Charging state, all team members with Domain Resonance tag deal 20% more Total DMG.● When Astral Ring Specialization: World Star or Astral Ring Specialization: Wheel of Destiny is activated, other team members deal 33% more Elemental DMG, and the team's Crit Rate increases by 30%."
+    }
+  }
+}
