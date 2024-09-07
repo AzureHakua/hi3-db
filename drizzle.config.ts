@@ -5,7 +5,7 @@ import { resolve } from 'path';
 config({ path: '.env' });
 
 export default defineConfig({
-    schema: './src/db/schema.ts',
+    schema: './src/backend/db/schema.ts',
     out: './migrations',
     dialect: 'sqlite',
     driver: 'turso',
