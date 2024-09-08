@@ -43,6 +43,8 @@ export const getStigmata = async ({ query }: { query: any }) => {
   console.log('getStigmata called with query:', query)
   let stigmataData;
 
+  const limit = query.limit ? Number(query.limit) : 10; // Default to 10 if not specified
+
   if (query.id) {
     // If 'id' is provided, fetch the stigmata with the given ID
     stigmataData = await db.select().from(stigmata).where(eq(stigmata.id, Number(query.id)));
@@ -64,7 +66,7 @@ export const getStigmata = async ({ query }: { query: any }) => {
     stigmataData = await db.select().from(stigmata).where(eq(stigmata.name, query.name));
   } else {
     // If no specific query parameters are provided, fetch all stigmata
-    stigmataData = await db.select().from(stigmata).all();
+    stigmataData = await db.select().from(stigmata).limit(limit).all();
   }
 
   // Fetch related data for each stigmata
@@ -301,6 +303,7 @@ export const stigmataRoutes = new Elysia({ prefix: '/api' })
       id: t.Optional(t.Numeric()),
       name: t.Optional(t.String()),
       pos: t.Optional(t.String()),
+      limit: t.Optional(t.Numeric()),
     }),
   })
   /**
