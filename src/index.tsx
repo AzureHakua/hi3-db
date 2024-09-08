@@ -1,6 +1,7 @@
 import { Elysia } from 'elysia'
 import { html, Html } from '@elysiajs/html'
 import { cors } from '@elysiajs/cors'
+import { tailwind } from '@gtramontina.com/elysia-tailwind'
 import { swagger } from '@elysiajs/swagger'
 import { stigmataRoutes, getStigmata } from './backend/routes/stigmata'
 import { StigmataList } from './components/StigmataList'
@@ -8,6 +9,16 @@ import { StigmataList } from './components/StigmataList'
 const app = new Elysia()
   .use(html())
   .use(cors())
+  .use(tailwind({
+      path: "/styles/stylesheet.css",
+      source: "./styles/styles.css",
+      config: "../tailwind.config.js",
+      options: {
+          minify: true,
+          map: true,
+          autoprefixer: false
+      }
+  }))
   .use(swagger())
   .use(stigmataRoutes)
   .get('/', () => (
