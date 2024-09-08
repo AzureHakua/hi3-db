@@ -44,4 +44,10 @@ export const setEffects = sqliteTable('set_effects', {
 });
 
 export type InsertStigmata = typeof stigmata.$inferInsert;
-export type SelectStigmata = typeof stigmata.$inferSelect;
+export type SelectStigmata = typeof stigmata.$inferSelect & {
+    positions: (typeof positions.$inferSelect & {
+      stats: typeof stats.$inferSelect
+    })[];
+    images: typeof images.$inferSelect[];
+    setEffects: typeof setEffects.$inferSelect;
+  };
