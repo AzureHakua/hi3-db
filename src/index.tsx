@@ -29,7 +29,7 @@ const app = new Elysia()
         <link href="/styles/stylesheet.css" rel="stylesheet"></link>
         <script src="https://unpkg.com/htmx.org@2.0.2"></script>
       </head>
-      <body class="bg-gray-900"
+      <body class="bg-slate-900"
         hx-get='/stigmata'
         hx-trigger='load'
         hx-swap='innerHTML'

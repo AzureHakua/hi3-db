@@ -6,7 +6,7 @@ export function Stigma(props: SelectStigmata) {
   const bigImages = images?.filter(img => img.bigUrl);
 
   return (
-    <div class="bg-gray-800 shadow-lg rounded-lg overflow-hidden">
+    <div class="bg-slate-800 shadow-lg rounded-lg overflow-hidden">
       <div class="flex flex-col md:grid md:grid-cols-2">
         
         <div class="m-4">
@@ -32,7 +32,7 @@ export function Stigma(props: SelectStigmata) {
           </div>
         </div>
 
-        <div id={`content-container-${id}`} class="text-slate-100 py-4">
+        <div id={`content-container-${id}`} class="text-slate-100 mt-8 min-h-[540px]">
           {positions && positions.map((pos, index) => (
             <div id={`content-${id}-${index}`} class={index === 0 ? '' : 'hidden'}>
               {bigImages && bigImages.length > 0 && (
@@ -41,8 +41,8 @@ export function Stigma(props: SelectStigmata) {
                 </div>
               )}
               <div class="m-4">
-                <p class="font-medium text-lg text-gray-200">{pos.skillName}</p>
-                <p class="text-sm text-gray-400 mt-1">{pos.skillDescription}</p>
+                <p class="font-medium text-lg text-slate-200">{pos.skillName}</p>
+                <p class="text-sm text-slate-400 mt-1">{pos.skillDescription}</p>
               </div>
             </div>
           ))}
@@ -50,18 +50,18 @@ export function Stigma(props: SelectStigmata) {
 
         <div class="flex flex-col col-span-2 mx-4">
           {setEffects && (setEffects.setName || setEffects.twoPieceEffect || setEffects.threePieceEffect) && (
-            <div class="text-sm border-t border-gray-700 text-gray-200 mt-4 p-4">
-              {setEffects.setName && <p class="font-medium">Set: {setEffects.setName}</p>}
+            <div class="text-sm border-t border-slate-700 text-slate-200 mt-4 p-4">
+              {setEffects.setName && <p class="font-medium text-lg">Set: {setEffects.setName}</p>}
               {setEffects.twoPieceEffect && (
                 <>
-                  <p class="mt-1 text-gray-300"><span class="font-bold">2-Piece:</span></p>
-                  <p class="mt-1 text-gray-400">{setEffects.twoPieceEffect}</p>
+                  <p class="mt-1 text-slate-300"><span class="font-bold">2-Piece:</span></p>
+                  <p class="mt-1 text-slate-400">{setEffects.twoPieceEffect}</p>
                 </>
               )}
               {setEffects.threePieceEffect && (
                 <>
-                  <p class="mt-1 text-gray-300"><span class="font-bold">3-Piece:</span></p>
-                  <p class="mt-1 text-gray-400">{setEffects.threePieceEffect}</p>
+                  <p class="mt-1 text-slate-300"><span class="font-bold">3-Piece:</span></p>
+                  <p class="mt-1 text-slate-400">{setEffects.threePieceEffect}</p>
                 </>
               )}
             </div>
