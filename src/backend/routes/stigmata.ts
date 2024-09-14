@@ -406,4 +406,4 @@ export const stigmataRoutes = new Elysia({ prefix: '/api' })
     })
   })
 
-console.log('Stigmata routes loaded:', stigmataRoutes.routes.map(r => `${r.method} ${r.path}`))
+//console.log('Stigmata routes loaded:', stigmataRoutes.routes.map(r => `${r.method} ${r.path}`))
