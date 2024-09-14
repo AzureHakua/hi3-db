@@ -4,7 +4,7 @@ import { Stigma } from './Stigma'
 
 export function StigmataList({ stigmata }: { stigmata: SelectStigmata[] }) {
   return (
-    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4">
+    <div class="grid grid-cols-1 max-w-5xl 3xl:max-w-screen-xl w-full gap-4 my-4 mx-auto">
       {stigmata.map((stigma) => (
         <Stigma {...stigma} />
       ))}
