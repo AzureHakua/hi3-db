@@ -29,20 +29,35 @@ const app = new Elysia()
         <link href="/styles/stylesheet.css" rel="stylesheet"></link>
         <script src="https://unpkg.com/htmx.org@2.0.2"></script>
       </head>
-      <body class="bg-slate-900"
-        hx-get='/stigmata'
-        hx-trigger='load'
-        hx-swap='innerHTML'
-      />
+      <body class="bg-slate-900">
+        <div class="flex justify-center m-4">
+          <input 
+            type="text" 
+            id="search-input"
+            name="search"
+            placeholder="Search stigmata..."
+            class="max-w-4xl 3xl:max-w-screen-xl w-full p-2 my-2 rounded-md bg-slate-800 text-white"
+            hx-trigger="keyup changed delay:500ms"
+            hx-get="/stigmata"
+            hx-target="#stigmata-list"
+          />
+        </div>
+        <div id="stigmata-list" hx-get='/stigmata' hx-trigger='load'></div>
+      </body>
     </html>
   ))
-  .get('/stigmata', async () => {
+  .get('/stigmata', async ({ query }) => {
     try {
-      const stigmata = await getStigmata({ query: {} })
-      return <StigmataList stigmata={stigmata} />
+      const searchTerm = query.search || '';
+      const stigmata = await getStigmata({ 
+        query: { 
+          name: searchTerm ? { $like: `%${searchTerm}%` } : undefined 
+        } 
+      });
+      return <StigmataList stigmata={stigmata} />;
     } catch (error) {
-      console.error('Error fetching stigmata:', error)
-      return <div>Error fetching stigmata data</div>
+      console.error('Error fetching stigmata:', error);
+      return <div class="text-slate-200">Error fetching stigmata data</div>;
     }
   })
   .get('/stigmata/:id/position/:index', async ({ params }) => {
@@ -55,14 +70,10 @@ const app = new Elysia()
     return (
       <div>
         {stigma.images && stigma.images.length > 0 && (
-          <div class="rounded-full border-2 border-slate-100 overflow-hidden aspect-square mx-20 shadow-[0px_0px_10px_0px_white] hidden md:flex">
+          <div class="rounded-none border-2 border-slate-400 overflow-hidden aspect-square mx-10 hidden md:flex">
             <img src={stigma.images.find(img => img.position === pos.position)?.bigUrl ?? ''} alt={`${stigma.name} ${pos.position}`} class="object-cover rounded" />
           </div>
         )}
-        <div class="m-4">
-          <p class="font-medium text-lg text-gray-200">{pos.skillName}</p>
-          <p class="text-sm text-gray-400 mt-1">{pos.skillDescription}</p>
-        </div>
       </div>
     );
   })

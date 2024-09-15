@@ -1,7 +1,7 @@
 import { Elysia, t } from 'elysia'
 import { db } from '../db'
 import { stigmata, positions, stats, images, setEffects, InsertStigmata } from '../db/schema'
-import { eq, and } from 'drizzle-orm'
+import { eq, and, like } from 'drizzle-orm'
 
 const API_KEY = process.env.API_KEY
 
@@ -42,10 +42,21 @@ const checkAuth = ({ headers }: { headers: { authorization: string } }) => {
 export const getStigmata = async ({ query }: { query: any }) => {
   console.log('getStigmata called with query:', query)
   let stigmataData;
-
   const limit = query.limit ? Number(query.limit) : 10; // Default to 10 if not specified
 
-  if (query.id) {
+  if (query.name?.$like) {
+    const searchTerm = query.name.$like.replace(/%/g, '');
+    stigmataData = await db.select()
+      .from(stigmata)
+      .where(like(stigmata.name, `%${searchTerm}%`))
+      .limit(limit);
+  } else if (query.name) { 
+    const searchTerm = query.name.replace(/\+/g, ' ');
+    stigmataData = await db.select()
+      .from(stigmata)
+      .where(like(stigmata.name, `%${searchTerm}%`))
+      .limit(limit);
+  } else if (query.id) {
     // If 'id' is provided, fetch the stigmata with the given ID
     stigmataData = await db.select().from(stigmata).where(eq(stigmata.id, Number(query.id)));
   } else if (query.name && query.pos) {
@@ -61,9 +72,6 @@ export const getStigmata = async ({ query }: { query: any }) => {
         eq(stigmata.name, query.name),
         eq(positions.position, query.pos)
       ));
-  } else if (query.name) {
-    // If 'name' is provided, fetch the stigmata with the given name
-    stigmataData = await db.select().from(stigmata).where(eq(stigmata.name, query.name));
   } else {
     // If no specific query parameters are provided, fetch all stigmata
     stigmataData = await db.select().from(stigmata).limit(limit).all();
