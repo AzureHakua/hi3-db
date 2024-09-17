@@ -6,7 +6,7 @@ export function Stigma(props: SelectStigmata) {
   const bigImages = images?.filter(img => img.bigUrl);
 
   return (
-    <div class="bg-slate-800 shadow-lg rounded-lg overflow-hidden">
+    <div class="bg-slate-700 shadow-lg rounded-lg overflow-hidden">
       <div class="flex flex-col md:grid md:grid-cols-2">
         
         <div class="mx-4 mt-4">
@@ -17,10 +17,10 @@ export function Stigma(props: SelectStigmata) {
             <hr class="w-full border-slate-600"></hr>
           </div>
 
-          <div class="text-slate-100">
+          <div class="text-slate-300">
             {positions && positions.map((pos) => (
               <div class="m-4">
-                <p class="font-medium text-lg text-slate-300 pl-2">({pos.position})<span class="mx-2"></span>{pos.skillName}</p>
+                <p class="font-medium text-lg pl-2">({pos.position})<span class="mx-2"></span>{pos.skillName}</p>
                 <p class="text-sm text-slate-400 mt-1">{pos.skillDescription}</p>
               </div>
             ))}
