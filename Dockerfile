@@ -2,10 +2,9 @@ FROM oven/bun AS builder
 
 WORKDIR /app
 
-COPY package.json .
-COPY bun.lockb .
+COPY package.json bun.lockb ./
 
-RUN bun install
+RUN bun install --production
 
 COPY . .
 
@@ -15,7 +14,12 @@ FROM oven/bun
 
 WORKDIR /app
 
-COPY --from=builder /app/server .
+# Copy the built server and node_modules
+COPY --from=builder /app/server ./server
+COPY --from=builder /app/node_modules ./node_modules
+
+# Copy any necessary configuration files
+COPY --from=builder /app/package.json ./package.json
 
 EXPOSE 3000
 
