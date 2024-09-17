@@ -10,6 +10,7 @@
   "dependencies": {
     "@elysiajs/cors": "^1.1.1",
     "@elysiajs/html": "^1.1.1",
+    "@elysiajs/static": "^1.1.1",
     "@elysiajs/swagger": "^1.1.1",
     "@gtramontina.com/elysia-tailwind": "2.0.0",
     "@libsql/client": "^0.10.0",

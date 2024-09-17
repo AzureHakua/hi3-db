@@ -23,6 +23,9 @@ COPY --from=builder /app/node_modules ./node_modules
 # Copy the src directory (including styles)
 COPY --from=builder /app/src ./src
 
+# Copy the public directory (including images)
+COPY --from=builder /app/public ./public
+
 # Copy all configuration files
 COPY --from=builder /app/*.json /app/*.js /app/*.ts /app/*.tsx ./
 

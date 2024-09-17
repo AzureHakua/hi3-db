@@ -50,7 +50,7 @@ export const getStigmata = async ({ query }: { query: any }) => {
       .from(stigmata)
       .where(like(stigmata.name, `%${searchTerm}%`))
       .limit(limit);
-  } else if (query.name) { 
+  } else if (query.name) {
     const searchTerm = query.name.replace(/\+/g, ' ');
     stigmataData = await db.select()
       .from(stigmata)
@@ -295,36 +295,41 @@ export const stigmataRoutes = new Elysia({ prefix: '/api' })
    */
   .post('/stigmata', ({ body, headers }) => {
     checkAuth({ headers })
+    if (Array.isArray(body)) {
+      return Promise.all(body.map(entry => postStigmata({ body: entry })))
+    }
     return postStigmata({ body })
   }, {
-    body: t.Object({
-      name: t.String(),
-      positions: t.Optional(t.Array(t.Object({
-        position: t.String(),
-        name: t.String(),
-        skillName: t.String(),
-        skillDescription: t.String(),
-        stats: t.Object({
-          hp: t.Optional(t.Number()),
-          atk: t.Optional(t.Number()),
-          def: t.Optional(t.Number()),
-          crt: t.Optional(t.Number()),
-          sp: t.Optional(t.Number()),
-        }),
-      }))),
-      images: t.Array(t.Object({
-        position: t.String(),
-        iconUrl: t.String(),
-        bigUrl: t.String(),
-      })),
-      setEffects: t.Optional(t.Object({
-        setName: t.Optional(t.String()),
-        twoPieceName: t.Optional(t.String()),
-        twoPieceEffect: t.Optional(t.String()),
-        threePieceName: t.Optional(t.String()),
-        threePieceEffect: t.Optional(t.String()),
-      })),
-    }),
+    body: t.Union([
+      t.Array(
+        t.Object({
+          name: t.String(),
+          positions: t.Optional(t.Array(t.Object({
+            position: t.String(),
+            name: t.String(),
+            skillName: t.String(),
+            skillDescription: t.String(),
+            stats: t.Object({
+              hp: t.Optional(t.Number()),
+              atk: t.Optional(t.Number()),
+              def: t.Optional(t.Number()),
+              crt: t.Optional(t.Number()),
+              sp: t.Optional(t.Number()),
+            }),
+          }))),
+          images: t.Array(t.Object({
+            position: t.String(),
+            iconUrl: t.String(),
+            bigUrl: t.String(),
+          })),
+          setEffects: t.Optional(t.Object({
+            setName: t.Optional(t.String()),
+            twoPieceName: t.Optional(t.String()),
+            twoPieceEffect: t.Optional(t.String()),
+            threePieceName: t.Optional(t.String()),
+            threePieceEffect: t.Optional(t.String()),
+          })),
+        }))]),
     headers: t.Object({
       authorization: t.String()
     })

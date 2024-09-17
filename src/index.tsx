@@ -3,6 +3,7 @@ import { html, Html } from '@elysiajs/html'
 import { cors } from '@elysiajs/cors'
 import { tailwind } from '@gtramontina.com/elysia-tailwind'
 import { swagger } from '@elysiajs/swagger'
+import { staticPlugin } from '@elysiajs/static'
 import { stigmataRoutes, getStigmata } from './backend/routes/stigmata'
 import { StigmataList } from './components/StigmataList'
 import { Sidebar } from './components/Sidebar'
@@ -22,6 +23,7 @@ const app = new Elysia()
     }
   }))
   .use(swagger())
+  .use(staticPlugin())
   .use(stigmataRoutes)
 
 const Layout = ({ children }: { children: JSX.Element }) => (
@@ -89,6 +91,24 @@ app.get('/stigmata-list', async ({ query }) => {
   }
 })
 
+app.get('/stigmata/:id/position/:index', async ({ params }) => {
+  const stigmata = await getStigmata({ query: { id: Number(params.id) } });
+  if (stigmata.length === 0) return 'Stigmata not found';
+
+  const stigma = stigmata[0];
+  const pos = stigma.positions[Number(params.index)];
+
+  return (
+    <div>
+      {stigma.images && stigma.images.length > 0 && (
+        <div class="rounded-none border-2 border-slate-400 overflow-hidden aspect-square mx-10 hidden md:flex">
+          <img src={stigma.images.find(img => img.position === pos.position)?.bigUrl ?? ''} alt={`${stigma.name} ${pos.position}`} class="object-cover rounded" />
+        </div>
+      )}
+    </div>
+  );
+})
+
 const UnderConstruction = ({ page }: { page: string }) => (
   <Layout>
     <>
@@ -105,4 +125,5 @@ app.get('/about', () => <UnderConstruction page="About" />)
 
 app.listen(3000)
 
+console.log('Static files being served from:', process.cwd() + '/public');
 console.log(`🦊 Elysia is running at ${app.server?.hostname}:${app.server?.port}`);
