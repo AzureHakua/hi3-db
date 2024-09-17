@@ -20,8 +20,8 @@
     "images": [
       {
         "position": "B",
-        "iconUrl": "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/5/52/%22Lantern%22_-_Clean-up_%28B%29_%28Icon%29.png/revision/latest?cb=20240413190701",
-        "bigUrl": "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/5/5e/%22Lantern%22_-_Clean-up_%28B%29.png/revision/latest?cb=20240413190739"
+        "iconUrl": "public/img/stigmata/Lantern__Clean-up_B_icon.png",
+        "bigUrl": "public/img/stigmata/Lantern__Clean-up_B_big.png"
       }
     ],
     "setEffects": {}
@@ -75,18 +75,18 @@
     "images": [
       {
         "position": "T",
-        "iconUrl": "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/8/8e/%22Lantern%22_-_Guardian_%28T%29_%28Icon%29.png/revision/latest?cb=20240527103108",
-        "bigUrl": "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/3/34/%22Lantern%22_-_Guardian_%28T%29.png/revision/latest?cb=20240527103257"
+        "iconUrl": "public/img/stigmata/Lantern__Guardian_T_icon.png",
+        "bigUrl": "public/img/stigmata/Lantern__Guardian_T_big.png"
       },
       {
         "position": "M",
-        "iconUrl": "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/b/b7/%22Lantern%22_-_Guardian_%28M%29_%28Icon%29.png/revision/latest?cb=20240527103129",
-        "bigUrl": "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/c/cd/%22Lantern%22_-_Guardian_%28M%29.png/revision/latest?cb=20240527103318"
+        "iconUrl": "public/img/stigmata/Lantern__Guardian_M_icon.png",
+        "bigUrl": "public/img/stigmata/Lantern__Guardian_M_big.png"
       },
       {
         "position": "B",
-        "iconUrl": "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/3/39/%22Lantern%22_-_Guardian_%28B%29_%28Icon%29.png/revision/latest?cb=20240527103146",
-        "bigUrl": "https://static.wikia.nocookie.net/honkaiimpact3_gamepedia_en/images/0/06/%22Lantern%22_-_Guardian_%28B%29.png/revision/latest?cb=20240527103336"
+        "iconUrl": "public/img/stigmata/Lantern__Guardian_B_big.png",
+        "bigUrl": "public/img/stigmata/Lantern__Guardian_B_icon.png"
       }
     ],
     "setEffects": {
