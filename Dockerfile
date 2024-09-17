@@ -14,12 +14,17 @@ FROM oven/bun
 
 WORKDIR /app
 
-# Copy the built server and node_modules
+# Copy the built server
 COPY --from=builder /app/server ./server
+
+# Copy node_modules from the builder stage
 COPY --from=builder /app/node_modules ./node_modules
 
-# Copy any necessary configuration files
-COPY --from=builder /app/package.json ./package.json
+# Copy the src directory (including styles)
+COPY --from=builder /app/src ./src
+
+# Copy all configuration files
+COPY --from=builder /app/*.json /app/*.js /app/*.ts /app/*.tsx ./
 
 EXPOSE 3000
 
