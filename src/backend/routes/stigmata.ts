@@ -59,19 +59,6 @@ export const getStigmata = async ({ query }: { query: any }) => {
   } else if (query.id) {
     // If 'id' is provided, fetch the stigmata with the given ID
     stigmataData = await db.select().from(stigmata).where(eq(stigmata.id, Number(query.id)));
-  } else if (query.name && query.pos) {
-    // If 'name' and 'pos' are provided, fetch the stigmata with the given name and position
-    stigmataData = await db
-      .select({
-        id: stigmata.id,
-        name: stigmata.name,
-      })
-      .from(stigmata)
-      .innerJoin(positions, eq(positions.stigmataId, stigmata.id))
-      .where(and(
-        eq(stigmata.name, query.name),
-        eq(positions.position, query.pos)
-      ));
   } else {
     // If no specific query parameters are provided, fetch all stigmata
     stigmataData = await db.select().from(stigmata).limit(limit).all();
@@ -79,18 +66,7 @@ export const getStigmata = async ({ query }: { query: any }) => {
 
   // Fetch related data for each stigmata
   const fullData = await Promise.all(stigmataData.map(async (s) => {
-    let positionsData;
-    if (query.name && query.pos) {
-      // If both name and position are specified, we've already filtered positions
-      positionsData = await db.select().from(positions)
-        .where(and(
-          eq(positions.stigmataId, s.id),
-          eq(positions.position, query.pos)
-        ));
-    } else {
-      // Otherwise, get all positions
-      positionsData = await db.select().from(positions).where(eq(positions.stigmataId, s.id));
-    }
+    let positionsData = await db.select().from(positions).where(eq(positions.stigmataId, s.id));
 
     const positionsWithStats = await Promise.all(positionsData.map(async (p) => {
       const statsData = await db.select().from(stats).where(eq(stats.positionId, p.id));
@@ -310,7 +286,6 @@ export const stigmataRoutes = new Elysia({ prefix: '/api' })
     query: t.Object({
       id: t.Optional(t.Numeric()),
       name: t.Optional(t.String()),
-      pos: t.Optional(t.String()),
       limit: t.Optional(t.Numeric()),
     }),
   })
@@ -414,4 +389,4 @@ export const stigmataRoutes = new Elysia({ prefix: '/api' })
     })
   })
 
-//console.log('Stigmata routes loaded:', stigmataRoutes.routes.map(r => `${r.method} ${r.path}`))
+console.log('Stigmata routes loaded:', stigmataRoutes.routes.map(r => `${r.method} ${r.path}`))
