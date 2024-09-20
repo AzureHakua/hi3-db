@@ -6,7 +6,7 @@ export const stigmata = sqliteTable('stigmata', {
     name: text('name').notNull(),
 });
 
-export const positions = sqliteTable('positions', {
+export const stigmataPositions = sqliteTable('stigmata_positions', {
     id: integer('id').primaryKey({ autoIncrement: true }),
     stigmataId: integer('stigmata_id').notNull().references(() => stigmata.id),
     position: text('position').notNull(),
@@ -15,9 +15,9 @@ export const positions = sqliteTable('positions', {
     skillDescription: text('skill_description'),
 });
 
-export const stats = sqliteTable('stats', {
+export const stigmataStats = sqliteTable('stigmata_stats', {
     id: integer('id').primaryKey({ autoIncrement: true }),
-    positionId: integer('position_id').notNull().references(() => positions.id),
+    positionId: integer('position_id').notNull().references(() => stigmataPositions.id),
     hp: integer('hp'),
     atk: integer('atk'),
     def: integer('def'),
@@ -25,7 +25,7 @@ export const stats = sqliteTable('stats', {
     sp: integer('sp'),
 });
 
-export const images = sqliteTable('images', {
+export const stigmataImages = sqliteTable('stigmata_images', {
     id: integer('id').primaryKey({ autoIncrement: true }),
     stigmataId: integer('stigmata_id').notNull().references(() => stigmata.id),
     position: text('position').notNull(),
@@ -33,7 +33,7 @@ export const images = sqliteTable('images', {
     bigUrl: text('big_url'),
 });
 
-export const setEffects = sqliteTable('set_effects', {
+export const stigmataSetEffects = sqliteTable('stigmata_set_effects', {
     id: integer('id').primaryKey({ autoIncrement: true }),
     stigmataId: integer('stigmata_id').notNull().references(() => stigmata.id),
     setName: text('set_name'),
@@ -45,9 +45,9 @@ export const setEffects = sqliteTable('set_effects', {
 
 export type InsertStigmata = typeof stigmata.$inferInsert;
 export type SelectStigmata = typeof stigmata.$inferSelect & {
-    positions: (typeof positions.$inferSelect & {
-      stats: typeof stats.$inferSelect
+    positions: (typeof stigmataPositions.$inferSelect & {
+      stats: typeof stigmataStats.$inferSelect
     })[];
-    images: typeof images.$inferSelect[];
-    setEffects: typeof setEffects.$inferSelect;
+    images: typeof stigmataImages.$inferSelect[];
+    setEffects: typeof stigmataSetEffects.$inferSelect;
   };
