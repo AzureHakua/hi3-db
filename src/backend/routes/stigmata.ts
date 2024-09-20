@@ -1,6 +1,6 @@
 import { Elysia, t } from 'elysia'
 import { db } from '../db'
-import { stigmata, positions, stats, images, setEffects, InsertStigmata } from '../db/schema'
+import { stigmata, stigmataPositions, stigmataStats, stigmataImages, stigmataSetEffects, InsertStigmata } from '../db/schema'
 import { eq, and, like } from 'drizzle-orm'
 
 const API_KEY = process.env.API_KEY
@@ -66,15 +66,15 @@ export const getStigmata = async ({ query }: { query: any }) => {
 
   // Fetch related data for each stigmata
   const fullData = await Promise.all(stigmataData.map(async (s) => {
-    let positionsData = await db.select().from(positions).where(eq(positions.stigmataId, s.id));
+    let positionsData = await db.select().from(stigmataPositions).where(eq(stigmataPositions.stigmataId, s.id));
 
     const positionsWithStats = await Promise.all(positionsData.map(async (p) => {
-      const statsData = await db.select().from(stats).where(eq(stats.positionId, p.id));
+      const statsData = await db.select().from(stigmataStats).where(eq(stigmataStats.positionId, p.id));
       return { ...p, stats: statsData[0] };
     }));
 
-    const imagesData = await db.select().from(images).where(eq(images.stigmataId, s.id));
-    const setEffectsData = await db.select().from(setEffects).where(eq(setEffects.stigmataId, s.id));
+    const imagesData = await db.select().from(stigmataImages).where(eq(stigmataImages.stigmataId, s.id));
+    const setEffectsData = await db.select().from(stigmataSetEffects).where(eq(stigmataSetEffects.stigmataId, s.id));
 
     return {
       ...s,
@@ -104,7 +104,7 @@ export const postStigmata = async ({ body }: { body: any }) => {
 
     if (body.positions) {
       for (const pos of body.positions) {
-        const positionResult = await tx.insert(positions).values({
+        const positionResult = await tx.insert(stigmataPositions).values({
           stigmataId: stigmataResult.id,
           position: pos.position,
           name: pos.name,
@@ -113,7 +113,7 @@ export const postStigmata = async ({ body }: { body: any }) => {
         }).returning().get();
 
         if (pos.stats) {
-          await tx.insert(stats).values({
+          await tx.insert(stigmataStats).values({
             positionId: positionResult.id,
             ...pos.stats,
           });
@@ -122,14 +122,14 @@ export const postStigmata = async ({ body }: { body: any }) => {
     }
 
     if (body.images) {
-      await tx.insert(images).values(body.images.map((img: any) => ({
+      await tx.insert(stigmataImages).values(body.images.map((img: any) => ({
         stigmataId: stigmataResult.id,
         ...img,
       })));
     }
 
     if (body.setEffects) {
-      await tx.insert(setEffects).values({
+      await tx.insert(stigmataSetEffects).values({
         stigmataId: stigmataResult.id,
         ...body.setEffects,
       });
@@ -165,24 +165,24 @@ export const patchStigmata = async ({ params, body }: { params: { id: number }, 
 
       for (const pos of positionsToUpdate) {
         const existingPosition = await tx.select()
-          .from(positions)
+          .from(stigmataPositions)
           .where(and(
-            eq(positions.stigmataId, params.id),
-            eq(positions.position, pos.position)
+            eq(stigmataPositions.stigmataId, params.id),
+            eq(stigmataPositions.position, pos.position)
           ))
           .get();
 
         if (existingPosition) {
-          await tx.update(positions)
+          await tx.update(stigmataPositions)
             .set({
               name: pos.name,
               skillName: pos.skill_name,
               skillDescription: pos.skill_description,
             })
-            .where(eq(positions.id, existingPosition.id));
+            .where(eq(stigmataPositions.id, existingPosition.id));
 
           if (pos.stats) {
-            await tx.update(stats)
+            await tx.update(stigmataStats)
               .set({
                 hp: Number(pos.stats.HP),
                 atk: Number(pos.stats.ATK),
@@ -190,10 +190,10 @@ export const patchStigmata = async ({ params, body }: { params: { id: number }, 
                 crt: Number(pos.stats.CRT),
                 sp: Number(pos.stats.SP),
               })
-              .where(eq(stats.positionId, existingPosition.id));
+              .where(eq(stigmataStats.positionId, existingPosition.id));
           }
         } else {
-          const newPosition = await tx.insert(positions)
+          const newPosition = await tx.insert(stigmataPositions)
             .values({
               stigmataId: params.id,
               position: pos.position,
@@ -205,7 +205,7 @@ export const patchStigmata = async ({ params, body }: { params: { id: number }, 
             .get();
 
           if (pos.stats) {
-            await tx.insert(stats)
+            await tx.insert(stigmataStats)
               .values({
                 positionId: newPosition.id,
                 hp: Number(pos.stats.HP),
@@ -223,13 +223,13 @@ export const patchStigmata = async ({ params, body }: { params: { id: number }, 
       const imagesToUpdate = Array.isArray(body.images) ? body.images : [body.images];
 
       for (const img of imagesToUpdate) {
-        await tx.delete(images)
+        await tx.delete(stigmataImages)
           .where(and(
-            eq(images.stigmataId, params.id),
-            eq(images.position, img.position)
+            eq(stigmataImages.stigmataId, params.id),
+            eq(stigmataImages.position, img.position)
           ));
 
-        await tx.insert(images)
+        await tx.insert(stigmataImages)
           .values({
             stigmataId: params.id,
             position: img.position,
@@ -240,7 +240,7 @@ export const patchStigmata = async ({ params, body }: { params: { id: number }, 
     }
 
     if (body.set) {
-      await tx.update(setEffects)
+      await tx.update(stigmataSetEffects)
         .set({
           setName: body.set.name,
           twoPieceName: body.set["2_piece"]?.name,
@@ -248,7 +248,7 @@ export const patchStigmata = async ({ params, body }: { params: { id: number }, 
           threePieceName: body.set["3_piece"]?.name,
           threePieceEffect: body.set["3_piece"]?.effect,
         })
-        .where(eq(setEffects.stigmataId, params.id));
+        .where(eq(stigmataSetEffects.stigmataId, params.id));
     }
 
     return await tx.select().from(stigmata).where(eq(stigmata.id, params.id)).get();
@@ -264,10 +264,10 @@ export const patchStigmata = async ({ params, body }: { params: { id: number }, 
 export const deleteStigmata = async ({ params }: { params: { id: number } }) => {
   console.log('deleteStigmata called', params);
   await db.transaction(async (tx) => {
-    await tx.delete(stats).where(eq(stats.positionId, tx.select({ id: positions.id }).from(positions).where(eq(positions.stigmataId, params.id))));
-    await tx.delete(positions).where(eq(positions.stigmataId, params.id));
-    await tx.delete(images).where(eq(images.stigmataId, params.id));
-    await tx.delete(setEffects).where(eq(setEffects.stigmataId, params.id));
+    await tx.delete(stigmataStats).where(eq(stigmataStats.positionId, tx.select({ id: stigmataPositions.id }).from(stigmataPositions).where(eq(stigmataPositions.stigmataId, params.id))));
+    await tx.delete(stigmataPositions).where(eq(stigmataPositions.stigmataId, params.id));
+    await tx.delete(stigmataImages).where(eq(stigmataImages.stigmataId, params.id));
+    await tx.delete(stigmataSetEffects).where(eq(stigmataSetEffects.stigmataId, params.id));
     await tx.delete(stigmata).where(eq(stigmata.id, params.id));
   });
   return { success: true };
