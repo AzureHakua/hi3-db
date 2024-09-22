@@ -18,9 +18,13 @@ export function Weapon(props: SelectWeapon) {
           </div>
 
           <div class="text-slate-300">
-            <div class="m-4 flex justify-center items-center space-x-8">
-                <div><p class="font-medium text-lg">ATK: {atk}</p></div>
-                <div><p class="font-medium text-lg">CRT: {crt}</p></div>
+            <div class="m-4 flex justify-center items-center">
+                <div class="p-4">
+                  <p class="font-medium text-lg">ATK: {atk}</p>
+                </div>
+                <div class="p-4">
+                  <p class="font-medium text-lg">CRT: {crt}</p>
+                </div>
             </div>
           </div>
         </div>
