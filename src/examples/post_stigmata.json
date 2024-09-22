@@ -1,18 +1,18 @@
 {
   "Single Stigmata Post":
   {
-    "name": "\"Lantern\": Clean-up",
+    "name": "Test Stigma",
     "positions": [
       {
         "position": "B",
-        "name": "\"Lantern\": Clean-up (B)",
-        "skillName": "Resting in the Shadows",
-        "skillDescription": "Move Speed increases by 10.0% during Stellar Outburst.",
+        "name": "Test Stigma (B)",
+        "skillName": "Test Skill",
+        "skillDescription": "Test Skill Description",
         "stats": {
-          "hp": 261,
-          "atk": 26,
-          "def": 41,
-          "crt": 6,
+          "hp": 0,
+          "atk": 0,
+          "def": 0,
+          "crt": 0,
           "sp": 0
         }
       }
@@ -20,54 +20,60 @@
     "images": [
       {
         "position": "B",
-        "iconUrl": "public/img/stigmata/Lantern__Clean-up_B_icon.png",
-        "bigUrl": "public/img/stigmata/Lantern__Clean-up_B_big.png"
+        "iconUrl": "public/img/stigmata/MEI_B_icon.png",
+        "bigUrl": "public/img/stigmata/MEI_B_big.png"
       }
     ],
-    "setEffects": {}
+    "setEffects": {
+      "setName": "Test Set Effect",
+      "twoPieceName": "Two Test",
+      "twoPieceEffect": "Two Test Effect",
+      "threePieceName": "Three Test",
+      "threePieceEffect": "Three Test Effect"
+    }
   },
 
 
   "All Positions Post":
   {
-    "name": "\"Lantern\": Guardian",
+    "name": "Test Stigmata",
     "positions": [
       {
         "position": "T",
-        "name": "\"Lantern\": Guardian (T)",
-        "skillName": "Protect the Serene Night",
-        "skillDescription": "The character deals 25.0% more Fire DMG. When equipped by Lone Destruction: Shadowchaser, enemies take 23.0% more Fire DMG from her. If she has Hanging Flame, she receives the following effect:● All enemies on the field take 9.0% more Elemental DMG from the team.",
+        "name": "Test Stigmata (T)",
+        "skillName": "Test Skill (T)",
+        "skillDescription": "Test Skill Description (T)",
         "stats": {
-          "hp": 371,
-          "atk": 113,
-          "def": 41,
-          "crt": 77,
+          "hp": 0,
+          "atk": 0,
+          "def": 0,
+          "crt": 0,
           "sp": 0
         }
       },
       {
         "position": "M",
-        "name": "\"Lantern\": Guardian (M)",
-        "skillName": "May the Faint Light Shine Eternal",
-        "skillDescription": "The character deals 25.0% more Total DMG. When equipped by Lone Destruction: Shadowchaser with Hanging Flame, she receives the following effect:● When Astral Ring Specialization: World Star is activated, enemies take 30.0% more Total DMG through Resonance when Lone Destruction: Shadowchaser is on the field.● The character deals 35.0% more Fire DMG when Astral Ring is not activated.",
+        "name": "Test Stigmata (M)",
+        "skillName": "Test Skill (M)",
+        "skillDescription": "Test Skill Description (M)",
         "stats": {
-          "hp": 434,
+          "hp": 0,
           "atk": 0,
-          "def": 236,
-          "crt": 8,
+          "def": 0,
+          "crt": 0,
           "sp": 0
         }
       },
       {
         "position": "B",
-        "name": "\"Lantern\": Guardian (B)",
-        "skillName": "Obliterate Disasters and Misery",
-        "skillDescription": "The character's Ranged ATKs deal 30.0% more Total DMG. When equipped by Lone Destruction: Shadowchaser with Hanging Flame, she receives the following effects:● She deals 68.0% more Fire DMG when Astral Ring is not activated.● When Astral Ring is activated, all other characters on the team deal 20.0% more Total DMG.",
+        "name": "Test Stigmata (B)",
+        "skillName": "Test Skill (B)",
+        "skillDescription": "Test Skill Description (B)",
         "stats": {
-          "hp": 388,
-          "atk": 59,
-          "def": 86,
-          "crt": 13,
+          "hp": 0,
+          "atk": 0,
+          "def": 0,
+          "crt": 0,
           "sp": 0
         }
       }
@@ -75,26 +81,26 @@
     "images": [
       {
         "position": "T",
-        "iconUrl": "public/img/stigmata/Lantern__Guardian_T_icon.png",
-        "bigUrl": "public/img/stigmata/Lantern__Guardian_T_big.png"
+        "iconUrl": "public/img/stigmata/MEI_T_icon.png",
+        "bigUrl": "public/img/stigmata/MEI_T_big.png"
       },
       {
         "position": "M",
-        "iconUrl": "public/img/stigmata/Lantern__Guardian_M_icon.png",
-        "bigUrl": "public/img/stigmata/Lantern__Guardian_M_big.png"
+        "iconUrl": "public/img/stigmata/MEI_M_icon.png",
+        "bigUrl": "public/img/stigmata/MEI_M_big.png"
       },
       {
         "position": "B",
-        "iconUrl": "public/img/stigmata/Lantern__Guardian_B_big.png",
-        "bigUrl": "public/img/stigmata/Lantern__Guardian_B_icon.png"
+        "iconUrl": "public/img/stigmata/MEI_B_icon.png",
+        "bigUrl": "public/img/stigmata/MEI_B_big.png"
       }
     ],
     "setEffects": {
-      "setName": "A Forged Light",
-      "twoPieceName": "Guardian's Weapons",
-      "twoPieceEffect": "The character's Ultimate deals 30.0% more Total DMG. When equipped by Lone Destruction: Shadowchaser with Hanging Flame, she receives the following effect:● When Astral Ring Specialization: Resonance is activated, she deals 20.0% more Fire DMG during Stellar Outburst, all enemies on the field take 34% more Total DMG, and all characters on the team deal 5% more Physical DMG and Crit DMG.",
-      "threePieceName": "Fluorescent Night",
-      "threePieceEffect": "The character deals 25.0% more Fire DMG.When equipped by Lone Destruction: Shadowchaser, she receives the following effects:● Entering Stellar Outburst or dealing DMG on the field will grant Hanging Flame. Hanging Flame allows the character to deal 22.0% more Fire DMG for 25s. Retriggering refreshes the duration.● When Astral Ring Specialization: Wheel of Destiny is activated, enemies take 29.0% more Total DMG from team members with Harmonized Shadow Star tag in Astral Ring Charging state, and characters with Harmonized Shadow Star tag will deal 30% more Crit DMG.● When Astral Ring Specialization: World Star is activated, the character deals 30% more Total DMG through Resonance. Enemies take 25% more Total DMG and Fire DMG from characters protected by Astral Ring Specialization: World Star. Additionally, in Astral Ring Charging state, all team members with Domain Resonance tag deal 20% more Total DMG.● When Astral Ring Specialization: World Star or Astral Ring Specialization: Wheel of Destiny is activated, other team members deal 33% more Elemental DMG, and the team's Crit Rate increases by 30%."
+      "setName": "Test Set Effect",
+      "twoPieceName": "Two Test",
+      "twoPieceEffect": "Two Test Effect",
+      "threePieceName": "Three Test",
+      "threePieceEffect": "Three Test Effect"
     }
   }
 }

@@ -5,9 +5,11 @@ import { tailwind } from '@gtramontina.com/elysia-tailwind'
 import { swagger } from '@elysiajs/swagger'
 import { staticPlugin } from '@elysiajs/static'
 import { stigmataRoutes, getStigmata } from './backend/routes/stigmata'
+import { weaponRoutes, getWeapon } from './backend/routes/weapons'
 import { StigmataList } from './components/StigmataList'
 import { Sidebar } from './components/Sidebar'
 import './styles/tailwind.css'
+import { WeaponList } from './components/WeaponList'
 
 const app = new Elysia()
   .use(html())
@@ -25,6 +27,7 @@ const app = new Elysia()
   .use(swagger())
   .use(staticPlugin())
   .use(stigmataRoutes)
+  .use(weaponRoutes)
 
 const Layout = ({ children }: { children: JSX.Element }) => (
   <html lang="en">
@@ -109,6 +112,41 @@ app.get('/stigmata/:id/position/:index', async ({ params }) => {
   );
 })
 
+app.get('/weapons', () => (
+  <Layout>
+    <>
+      <div class="flex justify-center m-4">
+        <input
+          type="text"
+          id="search-input"
+          name="search"
+          placeholder="Search weapons..."
+          class="max-w-4xl 3xl:max-w-screen-xl w-full p-2 my-2 rounded-md bg-slate-800 text-white"
+          hx-trigger="keyup changed delay:500ms"
+          hx-get="/weapon-list"
+          hx-target="#weapon-list"
+        />
+      </div>
+      <div id="weapon-list" hx-get='/weapon-list' hx-trigger='load'></div>
+    </>
+  </Layout>
+))
+
+app.get('/weapon-list', async ({ query }) => {
+  try {
+    const searchTerm = query.search as string || '';
+    const weapons = await getWeapon({
+      query: {
+        name: searchTerm ? { $like: `%${searchTerm}%` } : undefined
+      }
+    });
+    return <WeaponList weapons={weapons} />;
+  } catch (error) {
+    console.error('Error fetching weapons:', error);
+    return <div class="text-slate-200">Error fetching weapons data</div>;
+  }
+})
+
 const UnderConstruction = ({ page }: { page: string }) => (
   <Layout>
     <>
@@ -119,7 +157,6 @@ const UnderConstruction = ({ page }: { page: string }) => (
 )
 
 app.get('/valkyries', () => <UnderConstruction page="Valkyries" />)
-app.get('/weapons', () => <UnderConstruction page="Weapons" />)
 app.get('/astralops-elfs', () => <UnderConstruction page="AstralOps / ELFs" />)
 app.get('/about', () => <UnderConstruction page="About" />)
 

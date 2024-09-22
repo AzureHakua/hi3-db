@@ -1,5 +1,5 @@
-import { db } from '.';
-import { stigmata, stigmataPositions, stigmataStats, stigmataImages, stigmataSetEffects } from './schema';
+import { db } from '..';
+import { stigmata, stigmataPositions, stigmataStats, stigmataImages, stigmataSetEffects } from '../schema';
 import { sql } from 'drizzle-orm';
 
 async function resetDatabase() {
