@@ -19,14 +19,14 @@ export function Weapon(props: SelectWeapon) {
 
           <div class="text-slate-300">
             <div class="m-4 flex justify-center items-center space-x-8">
-                <p class="font-medium text-lg">ATK:<span class="mx-1"></span>{atk}</p>
-                <p class="font-medium text-lg">CRT:<span class="mx-1"></span>{crt}</p>
+                <div><p class="font-medium text-lg">ATK: {atk}</p></div>
+                <div><p class="font-medium text-lg">CRT: {crt}</p></div>
             </div>
           </div>
         </div>
 
-        <div class="mx-4 mt-6 flex flex-col justify-end">
-          <div class="flex justify-center">
+        <div class="mx-4 mt-4 flex flex-col justify-end">
+          <div class="flex mt-2 justify-center">
             <img src={maxImage ?? ''} alt={`${name}`} class="flex max-w-full max-h-full border-2 border-slate-400 object-cover rounded"/>
           </div>
         </div>
