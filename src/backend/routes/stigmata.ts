@@ -1,7 +1,8 @@
 import { Elysia, t } from 'elysia'
 import { db } from '../db'
-import { stigmata, stigmataPositions, stigmataStats, stigmataImages, stigmataSetEffects, InsertStigmata } from '../db/schema'
+import { stigmata, stigmataPositions, stigmataStats, stigmataImages, stigmataSetEffects } from '../db/schema'
 import { eq, and, like } from 'drizzle-orm'
+import { sql } from 'drizzle-orm';
 
 const API_KEY = process.env.API_KEY
 
@@ -269,6 +270,7 @@ export const deleteStigmata = async ({ params }: { params: { id: number } }) => 
     await tx.delete(stigmataImages).where(eq(stigmataImages.stigmataId, params.id));
     await tx.delete(stigmataSetEffects).where(eq(stigmataSetEffects.stigmataId, params.id));
     await tx.delete(stigmata).where(eq(stigmata.id, params.id));
+    await tx.run(sql`DELETE FROM sqlite_sequence WHERE name IN ('stigmata', 'stigmata_positions', 'stigmata_stats', 'stigmata_images', 'stigmata_set_effects')`);
   });
   return { success: true };
 }
