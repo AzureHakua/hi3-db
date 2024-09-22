@@ -16,7 +16,6 @@ if (!API_KEY) {
  *   Please use Stigmata whenever possible to avoid confusion unless there is a specific reason to use Stigma.
  */
 
-
 /**
  * Checks if the provided authorization header contains a valid API key.
  * @param {Object} params - The parameters object.
@@ -33,7 +32,6 @@ const checkAuth = ({ headers }: { headers: { authorization: string } }) => {
     throw new Error('Invalid API key')
   }
 }
-
 
 /**
  * Retrieves stigmata based on the provided query parameters.
@@ -88,7 +86,6 @@ export const getStigmata = async ({ query }: { query: any }) => {
   return fullData;
 }
 
-
 /**
  * Creates a new stigmata entry.
  * @param {Object} params.body - The request body.
@@ -141,7 +138,6 @@ export const postStigmata = async ({ body }: { body: any }) => {
 
   return newStigma;
 }
-
 
 /**
  * Updates an existing stigmata entry.
@@ -256,7 +252,6 @@ export const patchStigmata = async ({ params, body }: { params: { id: number }, 
   });
 }
 
-
 /**
  * Deletes a stigmata entry.
  * @param {Object} params.id - The ID of the stigmata to delete.
@@ -274,7 +269,6 @@ export const deleteStigmata = async ({ params }: { params: { id: number } }) => 
   });
   return { success: true };
 }
-
 
 /**
  * Defines the routes for stigmata operations.
