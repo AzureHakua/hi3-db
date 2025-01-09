@@ -7,9 +7,12 @@ import { staticPlugin } from '@elysiajs/static'
 import { stigmataRoutes, getStigmata } from './backend/routes/stigmata'
 import { weaponRoutes, getWeapon } from './backend/routes/weapons'
 import { StigmataList } from './components/StigmataList'
+import { TopNavbar } from './components/Topbar'
 import { Sidebar } from './components/Sidebar'
 import './styles/tailwind.css'
 import { WeaponList } from './components/WeaponList'
+
+let isSidebarVisible = true;
 
 const app = new Elysia()
   .use(html())
@@ -38,13 +41,14 @@ const Layout = ({ children }: { children: JSX.Element }) => (
       <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     </head>
     <body class="bg-slate-900 text-slate-300">
-      <div class="flex">
+      <TopNavbar />
+      <div id="sidebar-wrapper" class={`fixed top-0 left-0 h-screen transition-all duration-300 ease-in-out ${isSidebarVisible ? 'w-64' : 'w-0'} overflow-hidden`}>
         <Sidebar />
-        <div class="flex-1 w-full">
-          <main class="max-w-4x1 w-full p-8 mx-auto">
-            {children}
-          </main>
-        </div>
+      </div>
+      <div class="flex-1 w-full">
+        <main class="max-w-4x1 w-full p-20 mx-auto">
+          {children}
+        </main>
       </div>
     </body>
   </html>
@@ -147,11 +151,21 @@ app.get('/weapon-list', async ({ query }) => {
   }
 })
 
+app.post('/toggle-sidebar', () => {
+  isSidebarVisible = !isSidebarVisible;
+  return (
+    <div id="sidebar-wrapper" class={`fixed top-0 left-0 h-screen transition-all duration-300 ease-in-out ${isSidebarVisible ? 'w-64' : 'w-0'} overflow-hidden`}>
+      <Sidebar />
+    </div>
+  )
+})
+
+
 const UnderConstruction = ({ page }: { page: string }) => (
   <Layout>
     <>
-      <h1 class="text-3xl font-bold mb-4">{page}</h1>
-      <p>This page is currently under construction. Please check back later!</p>
+      <h1 class="text-3xl font-bold mb-4 text-center">{page}</h1>
+      <p class="text-center">This page is currently under construction. Please check back later!</p>
     </>
   </Layout>
 )
