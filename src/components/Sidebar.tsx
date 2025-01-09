@@ -1,9 +1,7 @@
 import { Html } from '@elysiajs/html'
 
 export const Sidebar = () => (
-  <div id="sidebar-wrapper" class="relative w-0 lg:w-64">
-    <aside id="sidebar" class="fixed bg-slate-800 h-screen p-4 overflow-y-auto z-40 transition-transform duration-300 ease-in-out transform -translate-x-full lg:translate-x-0">
-      <div class="text-2xl font-bold mx-2 my-4 text-center">Prometheus DB</div>
+  <aside id="sidebar" class="absolute top-0 left-0 pt-16 px-4 w-full h-full bg-slate-800 overflow-y-auto z-40 overflow-hidden">
       <nav>
         <ul class="space-y-2">
           {[
@@ -11,7 +9,7 @@ export const Sidebar = () => (
             { name: "Valkyries", path: "/valkyries" },
             { name: "Weapons", path: "/weapons" },
             { name: "Stigmata", path: "/stigmata" },
-            { name: "AstralOps / ELFs", path: "/astralops-elfs" },
+            { name: "AstralOps", path: "/astralops-elfs" },
             { name: "About", path: "/about" }
           ].map(item => (
             <li>
@@ -26,5 +24,4 @@ export const Sidebar = () => (
         </ul>
       </nav>
     </aside>
-  </div>
 )
