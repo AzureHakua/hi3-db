@@ -30,8 +30,7 @@ export const stigmataImages = sqliteTable('stigmata_images', {
   id: integer('id').primaryKey({ autoIncrement: true }),
   stigmataId: integer('stigmata_id').notNull().references(() => stigmata.id),
   position: text('position').notNull(),
-  iconUrl: text('icon_url'),
-  bigUrl: text('big_url'),
+  imgUrl: text('img_url'),
 });
 
 export const stigmataSetEffects = sqliteTable('stigmata_set_effects', {
