@@ -230,8 +230,7 @@ export const patchStigmata = async ({ params, body }: { params: { id: number }, 
           .values({
             stigmataId: params.id,
             position: img.position,
-            iconUrl: img.icon,
-            bigUrl: img.big,
+            imgUrl: img.imgUrl,
           });
       }
     }
@@ -315,8 +314,7 @@ export const stigmataRoutes = new Elysia({ prefix: '/api' })
           }))),
           images: t.Array(t.Object({
             position: t.String(),
-            iconUrl: t.String(),
-            bigUrl: t.String(),
+            imgUrl: t.String(),
           })),
           setEffects: t.Optional(t.Object({
             setName: t.Optional(t.String()),
@@ -359,8 +357,7 @@ export const stigmataRoutes = new Elysia({ prefix: '/api' })
       }))),
       images: t.Optional(t.Array(t.Object({
         position: t.String(),
-        iconUrl: t.Optional(t.String()),
-        bigUrl: t.Optional(t.String()),
+        imgUrl: t.Optional(t.String()),
       }))),
       setEffects: t.Optional(t.Object({
         setName: t.Optional(t.String()),
