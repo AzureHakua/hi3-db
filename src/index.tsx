@@ -109,7 +109,11 @@ app.get('/stigmata/:id/position/:index', async ({ params }) => {
     <div>
       {stigma.images && stigma.images.length > 0 && (
         <div class="rounded-none border-2 border-slate-400 overflow-hidden aspect-square mx-10 hidden md:flex">
-          <img src={stigma.images.find(img => img.position === pos.position)?.imgUrl ?? ''} alt={`${stigma.name} ${pos.position}`} class="object-cover rounded" />
+          <img src={stigma.images.find(img => img.position === pos.position)?.imgUrl ?? ''}
+            alt={`${stigma.name} ${pos.position}`}
+            class="object-cover rounded"
+            loading="lazy" 
+          />
         </div>
       )}
     </div>
