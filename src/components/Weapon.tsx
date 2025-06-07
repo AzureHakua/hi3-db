@@ -35,7 +35,7 @@ export function Weapon(props: SelectWeapon) {
           </div>
           
           {/* ID section - dedicated space below image */}
-          <div class="mt-1">
+          <div class="mt-2">
             <div class="text-center">
               <span class="bg-slate-800/80 text-slate-400 text-xs px-3 py-1.5 rounded border border-slate-600 font-mono">
                 ID: {String(id).padStart(3, '0')}
@@ -52,7 +52,7 @@ export function Weapon(props: SelectWeapon) {
             {skills.map((skill) => (
               <div>
                 <p class="text-slate-300 font-medium text-lg">{skill.skillName}</p>
-                <p class="text-sm text-slate-400 mt-1">{skill.skillDescription}</p>
+                <p class="text-sm text-slate-400 mt-2 mb-4">{skill.skillDescription}</p>
               </div>
             ))}
           </div>
