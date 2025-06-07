@@ -310,14 +310,34 @@ export const patchStigmata = async ({ params, body }: { params: { id: number }, 
  */
 export const deleteStigmata = async ({ params }: { params: { id: number } }) => {
   console.log('deleteStigmata called', params);
+  
   await db.transaction(async (tx) => {
-    await tx.delete(stigmataStats).where(eq(stigmataStats.positionId, tx.select({ id: stigmataPositions.id }).from(stigmataPositions).where(eq(stigmataPositions.stigmataId, params.id))));
+    // First, get all position IDs for this stigmata
+    const positions = await tx.select({ id: stigmataPositions.id })
+      .from(stigmataPositions)
+      .where(eq(stigmataPositions.stigmataId, params.id));
+
+    // Delete stats for each position
+    for (const position of positions) {
+      await tx.delete(stigmataStats).where(eq(stigmataStats.positionId, position.id));
+    }
+
+    // Delete positions
     await tx.delete(stigmataPositions).where(eq(stigmataPositions.stigmataId, params.id));
+    
+    // Delete images
     await tx.delete(stigmataImages).where(eq(stigmataImages.stigmataId, params.id));
+    
+    // Delete set effects
     await tx.delete(stigmataSetEffects).where(eq(stigmataSetEffects.stigmataId, params.id));
+    
+    // Finally, delete the main stigmata record
     await tx.delete(stigmata).where(eq(stigmata.id, params.id));
+    
+    // Reset auto-increment counters
     await tx.run(sql`DELETE FROM sqlite_sequence WHERE name IN ('stigmata', 'stigmata_positions', 'stigmata_stats', 'stigmata_images', 'stigmata_set_effects')`);
   });
+  
   return { success: true };
 }
 

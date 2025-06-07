@@ -1,4 +1,3 @@
-
 import { Elysia, t } from 'elysia'
 import { db } from '../db'
 import { weapon, weaponSkills, weaponImages } from '../db/schema'
@@ -52,21 +51,18 @@ export const getWeapon = async ({ query }: { query: any }) => {
       .where(like(weapon.name, `%${searchTerm}%`))
       .limit(limit);
   } else if (query.id) {
-    // If 'id' is provided, fetch the stigmata with the given ID
     weaponData = await db.select().from(weapon).where(eq(weapon.id, Number(query.id)));
   } else {
-    // If no specific query parameters are provided, fetch all stigmata
     weaponData = await db.select().from(weapon).limit(limit).all();
   }
 
-  // Fetch related data for each stigmata
-  const fullData = await Promise.all(weaponData.map(async (s) => {
-
-    const imagesData = await db.select().from(weaponImages).where(eq(weaponImages.weaponId, s.id));
-    const skillsData = await db.select().from(weaponSkills).where(eq(weaponSkills.weaponId, s.id));
+  // Fetch related data for each weapon
+  const fullData = await Promise.all(weaponData.map(async (w) => {
+    const imagesData = await db.select().from(weaponImages).where(eq(weaponImages.weaponId, w.id));
+    const skillsData = await db.select().from(weaponSkills).where(eq(weaponSkills.weaponId, w.id));
 
     return {
-      ...s,
+      ...w,
       images: imagesData,
       skills: skillsData,
     };
@@ -93,17 +89,19 @@ export const postWeapon = async ({ body }: { body: any }) => {
       crt: body.crt
     }).returning().get();
 
-    if (body.images) {
+    if (body.images && body.images.length > 0) {
       await tx.insert(weaponImages).values(body.images.map((img: any) => ({
         weaponId: weaponResult.id,
-        ...img,
+        baseUrl: img.baseUrl,
+        maxUrl: img.maxUrl,
       })));
     }
 
-    if (body.skills) {
+    if (body.skills && body.skills.length > 0) {
       await tx.insert(weaponSkills).values(body.skills.map((skill: any) => ({
         weaponId: weaponResult.id,
-        ...skill,
+        skillName: skill.skillName,
+        skillDescription: skill.skillDescription,
       })));
     }
 
@@ -114,12 +112,72 @@ export const postWeapon = async ({ body }: { body: any }) => {
 }
 
 /**
+ * Updates an existing weapon entry with partial updates.
+ * @param {Object} params - The parameters object.
+ * @param {number} params.id - The weapon ID.
+ * @param {Object} params.body - The request body.
+ * @returns {Object} The updated weapon object.
+ */
+export const patchWeapon = async ({ params, body }: { params: { id: number }, body: any }) => {
+  console.log('patchWeapon called', params);
+  
+  return await db.transaction(async (tx) => {
+    const weaponResult = await tx.select().from(weapon).where(eq(weapon.id, params.id)).get();
+    if (!weaponResult) {
+      throw new Error('Weapon not found');
+    }
+
+    // Update weapon basic info if provided
+    const updateData: any = {};
+    if (body.name !== undefined) updateData.name = body.name;
+    if (body.atk !== undefined) updateData.atk = body.atk;
+    if (body.crt !== undefined) updateData.crt = body.crt;
+
+    if (Object.keys(updateData).length > 0) {
+      await tx.update(weapon).set(updateData).where(eq(weapon.id, params.id));
+    }
+
+    // Update images if provided
+    if (body.images) {
+      // Delete existing images
+      await tx.delete(weaponImages).where(eq(weaponImages.weaponId, params.id));
+      
+      // Insert new images
+      if (body.images.length > 0) {
+        await tx.insert(weaponImages).values(body.images.map((img: any) => ({
+          weaponId: params.id,
+          baseUrl: img.baseUrl || null,
+          maxUrl: img.maxUrl || null,
+        })));
+      }
+    }
+
+    // Update skills if provided
+    if (body.skills) {
+      // Delete existing skills
+      await tx.delete(weaponSkills).where(eq(weaponSkills.weaponId, params.id));
+      
+      // Insert new skills
+      if (body.skills.length > 0) {
+        await tx.insert(weaponSkills).values(body.skills.map((skill: any) => ({
+          weaponId: params.id,
+          skillName: skill.skillName,
+          skillDescription: skill.skillDescription,
+        })));
+      }
+    }
+
+    return await tx.select().from(weapon).where(eq(weapon.id, params.id)).get();
+  });
+}
+
+/**
  * Deletes a weapon entry.
  * @param {Object} params.id - The ID of the weapon to delete.
  * @returns {Object} The success message.
  */
 export const deleteWeapon = async ({ params }: { params: { id: number } }) => {
-  console.log('deleteStigmata called', params);
+  console.log('deleteWeapon called', params);
   await db.transaction(async (tx) => {
     await tx.delete(weaponSkills).where(eq(weaponSkills.weaponId, params.id));
     await tx.delete(weaponImages).where(eq(weaponImages.weaponId, params.id));
@@ -155,18 +213,61 @@ export const weaponRoutes = new Elysia({ prefix: '/api' })
     }
     return postWeapon({ body })
   }, {
+    body: t.Union([
+      t.Object({
+        name: t.String(),
+        atk: t.Optional(t.Number()),
+        crt: t.Optional(t.Number()),
+        images: t.Optional(t.Array(t.Object({
+          baseUrl: t.Optional(t.String()),
+          maxUrl: t.Optional(t.String()),
+        }))),
+        skills: t.Optional(t.Array(t.Object({
+          skillName: t.String(),
+          skillDescription: t.String(),
+        }))),
+      }),
+      t.Array(t.Object({
+        name: t.String(),
+        atk: t.Optional(t.Number()),
+        crt: t.Optional(t.Number()),
+        images: t.Optional(t.Array(t.Object({
+          baseUrl: t.Optional(t.String()),
+          maxUrl: t.Optional(t.String()),
+        }))),
+        skills: t.Optional(t.Array(t.Object({
+          skillName: t.String(),
+          skillDescription: t.String(),
+        }))),
+      }))
+    ]),
+    headers: t.Object({
+      authorization: t.String()
+    })
+  })
+  /**
+   * PATCH /api/weapon/:id
+   * Updates an existing weapon entry. Requires authentication.
+   */
+  .patch('/weapon/:id', ({ params, body, headers }) => {
+    checkAuth({ headers })
+    return patchWeapon({ params, body })
+  }, {
+    params: t.Object({
+      id: t.Numeric(),
+    }),
     body: t.Object({
-      name: t.String(),
-      atk: t.Number(),
-      crt: t.Number(),
-      images: t.Array(t.Object({
+      name: t.Optional(t.String()),
+      atk: t.Optional(t.Number()),
+      crt: t.Optional(t.Number()),
+      images: t.Optional(t.Array(t.Object({
         baseUrl: t.Optional(t.String()),
         maxUrl: t.Optional(t.String()),
-      })),
-      skills: t.Array(t.Object({
-        skillName: t.String(),
-        skillDescription: t.String(),
-      })),
+      }))),
+      skills: t.Optional(t.Array(t.Object({
+        skillName: t.Optional(t.String()),
+        skillDescription: t.Optional(t.String()),
+      }))),
     }),
     headers: t.Object({
       authorization: t.String()
