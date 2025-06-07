@@ -50,10 +50,10 @@ export function Stigma(props: SelectStigmata) {
               {positions && positions.map((pos, index) => (
                 <div id={`content-${id}-${index}`} class={index === 0 ? '' : 'hidden'}>
                   {bigImages && bigImages.length > 0 && (
-                    <div class="rounded-none border-2 border-slate-400 overflow-hidden aspect-square mx-10 hidden md:flex">
+                    <div class="rounded-none border-2 border-slate-400 overflow-hidden aspect-square mx-4 md:mx-10 flex">
                       <img src={bigImages.find(img => img.position === pos.position)?.imgUrl ?? ''}
                         alt={`${name} ${pos.position}`}
-                        class="object-cover rounded"
+                        class="object-cover rounded w-full h-full"
                         loading="lazy"
                       />
                     </div>
