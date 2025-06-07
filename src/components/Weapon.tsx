@@ -33,6 +33,15 @@ export function Weapon(props: SelectWeapon) {
           <div class="flex mt-2 justify-center">
             <img src={maxImage ?? ''} alt={`${name}`} class="flex max-w-full max-h-full border-2 border-slate-400 object-cover rounded"/>
           </div>
+          
+          {/* ID section - dedicated space below image */}
+          <div class="mt-1">
+            <div class="text-center">
+              <span class="bg-slate-800/80 text-slate-400 text-xs px-3 py-1.5 rounded border border-slate-600 font-mono">
+                ID: {String(id).padStart(3, '0')}
+              </span>
+            </div>
+          </div>
         </div>
       </div>
 

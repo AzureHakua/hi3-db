@@ -140,23 +140,25 @@ export const postStigmata = async ({ body }: { body: any }) => {
 }
 
 /**
- * Updates an existing stigmata entry.
+ * Updates an existing stigmata entry with partial updates.
  * @param {Object} params.body - The request body.
  * @returns {Object} The updated stigmata object.
  */
 export const patchStigmata = async ({ params, body }: { params: { id: number }, body: any }) => {
   console.log('patchStigmata called', params);
-  // Check if the stigmata exists
+
   return await db.transaction(async (tx) => {
     const stigmataResult = await tx.select().from(stigmata).where(eq(stigmata.id, params.id)).get();
     if (!stigmataResult) {
       throw new Error('Stigmata not found');
     }
 
+    // Update stigmata name if provided
     if (body.name) {
       await tx.update(stigmata).set({ name: body.name }).where(eq(stigmata.id, params.id));
     }
 
+    // Update positions if provided
     if (body.positions) {
       const positionsToUpdate = Array.isArray(body.positions) ? body.positions : [body.positions];
 
@@ -170,81 +172,131 @@ export const patchStigmata = async ({ params, body }: { params: { id: number }, 
           .get();
 
         if (existingPosition) {
-          await tx.update(stigmataPositions)
-            .set({
-              name: pos.name,
-              skillName: pos.skill_name,
-              skillDescription: pos.skill_description,
-            })
-            .where(eq(stigmataPositions.id, existingPosition.id));
+          // Only update fields that are provided (partial update)
+          const updateData: any = {};
+          if (pos.name !== undefined) updateData.name = pos.name;
+          if (pos.skillName !== undefined) updateData.skillName = pos.skillName;
+          if (pos.skillDescription !== undefined) updateData.skillDescription = pos.skillDescription;
 
+          // Only update if there's something to update
+          if (Object.keys(updateData).length > 0) {
+            await tx.update(stigmataPositions)
+              .set(updateData)
+              .where(eq(stigmataPositions.id, existingPosition.id));
+          }
+
+          // Update stats if provided
           if (pos.stats) {
-            await tx.update(stigmataStats)
-              .set({
-                hp: Number(pos.stats.HP),
-                atk: Number(pos.stats.ATK),
-                def: Number(pos.stats.DEF),
-                crt: Number(pos.stats.CRT),
-                sp: Number(pos.stats.SP),
-              })
-              .where(eq(stigmataStats.positionId, existingPosition.id));
+            const statsUpdateData: any = {};
+            if (pos.stats.hp !== undefined) statsUpdateData.hp = Number(pos.stats.hp);
+            if (pos.stats.atk !== undefined) statsUpdateData.atk = Number(pos.stats.atk);
+            if (pos.stats.def !== undefined) statsUpdateData.def = Number(pos.stats.def);
+            if (pos.stats.crt !== undefined) statsUpdateData.crt = Number(pos.stats.crt);
+            if (pos.stats.sp !== undefined) statsUpdateData.sp = Number(pos.stats.sp);
+
+            if (Object.keys(statsUpdateData).length > 0) {
+              await tx.update(stigmataStats)
+                .set(statsUpdateData)
+                .where(eq(stigmataStats.positionId, existingPosition.id));
+            }
           }
         } else {
+          // Create new position (all required fields must be provided)
+          if (!pos.name) {
+            throw new Error(`Position name is required when creating new position ${pos.position}`);
+          }
+
           const newPosition = await tx.insert(stigmataPositions)
             .values({
               stigmataId: params.id,
               position: pos.position,
               name: pos.name,
-              skillName: pos.skill_name,
-              skillDescription: pos.skill_description,
+              skillName: pos.skillName || null,
+              skillDescription: pos.skillDescription || null,
             })
             .returning()
             .get();
 
+          // Create stats if provided
           if (pos.stats) {
             await tx.insert(stigmataStats)
               .values({
                 positionId: newPosition.id,
-                hp: Number(pos.stats.HP),
-                atk: Number(pos.stats.ATK),
-                def: Number(pos.stats.DEF),
-                crt: Number(pos.stats.CRT),
-                sp: Number(pos.stats.SP),
+                hp: pos.stats.hp || null,
+                atk: pos.stats.atk || null,
+                def: pos.stats.def || null,
+                crt: pos.stats.crt || null,
+                sp: pos.stats.sp || null,
               });
           }
         }
       }
     }
 
+    // Update images if provided
     if (body.images) {
       const imagesToUpdate = Array.isArray(body.images) ? body.images : [body.images];
 
       for (const img of imagesToUpdate) {
-        await tx.delete(stigmataImages)
+        // Check if image exists for this position
+        const existingImage = await tx.select()
+          .from(stigmataImages)
           .where(and(
             eq(stigmataImages.stigmataId, params.id),
             eq(stigmataImages.position, img.position)
-          ));
+          ))
+          .get();
 
-        await tx.insert(stigmataImages)
-          .values({
-            stigmataId: params.id,
-            position: img.position,
-            imgUrl: img.imgUrl,
-          });
+        if (existingImage && img.imgUrl !== undefined) {
+          // Update existing image
+          await tx.update(stigmataImages)
+            .set({ imgUrl: img.imgUrl })
+            .where(eq(stigmataImages.id, existingImage.id));
+        } else if (!existingImage && img.imgUrl) {
+          // Create new image
+          await tx.insert(stigmataImages)
+            .values({
+              stigmataId: params.id,
+              position: img.position,
+              imgUrl: img.imgUrl,
+            });
+        }
       }
     }
 
-    if (body.set) {
-      await tx.update(stigmataSetEffects)
-        .set({
-          setName: body.set.name,
-          twoPieceName: body.set["2_piece"]?.name,
-          twoPieceEffect: body.set["2_piece"]?.effect,
-          threePieceName: body.set["3_piece"]?.name,
-          threePieceEffect: body.set["3_piece"]?.effect,
-        })
-        .where(eq(stigmataSetEffects.stigmataId, params.id));
+    // Update set effects if provided
+    if (body.setEffects) {
+      const existingSetEffect = await tx.select()
+        .from(stigmataSetEffects)
+        .where(eq(stigmataSetEffects.stigmataId, params.id))
+        .get();
+
+      if (existingSetEffect) {
+        // Only update fields that are provided (partial update)
+        const setEffectsUpdateData: any = {};
+        if (body.setEffects.setName !== undefined) setEffectsUpdateData.setName = body.setEffects.setName;
+        if (body.setEffects.twoPieceName !== undefined) setEffectsUpdateData.twoPieceName = body.setEffects.twoPieceName;
+        if (body.setEffects.twoPieceEffect !== undefined) setEffectsUpdateData.twoPieceEffect = body.setEffects.twoPieceEffect;
+        if (body.setEffects.threePieceName !== undefined) setEffectsUpdateData.threePieceName = body.setEffects.threePieceName;
+        if (body.setEffects.threePieceEffect !== undefined) setEffectsUpdateData.threePieceEffect = body.setEffects.threePieceEffect;
+
+        if (Object.keys(setEffectsUpdateData).length > 0) {
+          await tx.update(stigmataSetEffects)
+            .set(setEffectsUpdateData)
+            .where(eq(stigmataSetEffects.stigmataId, params.id));
+        }
+      } else {
+        // Create new set effect
+        await tx.insert(stigmataSetEffects)
+          .values({
+            stigmataId: params.id,
+            setName: body.setEffects.setName || null,
+            twoPieceName: body.setEffects.twoPieceName || null,
+            twoPieceEffect: body.setEffects.twoPieceEffect || null,
+            threePieceName: body.setEffects.threePieceName || null,
+            threePieceEffect: body.setEffects.threePieceEffect || null,
+          });
+      }
     }
 
     return await tx.select().from(stigmata).where(eq(stigmata.id, params.id)).get();
@@ -342,9 +394,8 @@ export const stigmataRoutes = new Elysia({ prefix: '/api' })
     body: t.Object({
       name: t.Optional(t.String()),
       positions: t.Optional(t.Array(t.Object({
-        id: t.Optional(t.Number()),
-        position: t.String(),
-        name: t.String(),
+        position: t.String(), // Required - tells us which position to update
+        name: t.Optional(t.String()), // optional for partial updates
         skillName: t.Optional(t.String()),
         skillDescription: t.Optional(t.String()),
         stats: t.Optional(t.Object({
@@ -356,8 +407,8 @@ export const stigmataRoutes = new Elysia({ prefix: '/api' })
         })),
       }))),
       images: t.Optional(t.Array(t.Object({
-        position: t.String(),
-        imgUrl: t.Optional(t.String()),
+        position: t.String(), // Required - tells us which position's image to update
+        imgUrl: t.Optional(t.String()), // Optional - only update if provided
       }))),
       setEffects: t.Optional(t.Object({
         setName: t.Optional(t.String()),
