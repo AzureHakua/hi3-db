@@ -12,7 +12,9 @@ import { Sidebar } from './components/Sidebar'
 import './styles/tailwind.css'
 import { WeaponList } from './components/WeaponList'
 
-let isSidebarVisible = true;
+// Track sidebar visibility for different screen sizes
+let isSidebarVisibleMobile = false;  // Hidden by default on mobile
+let isSidebarVisibleDesktop = true;   // Shown by default on desktop
 
 const app = new Elysia()
   .use(html())
@@ -42,7 +44,7 @@ const Layout = ({ children }: { children: JSX.Element }) => (
     </head>
     <body class="bg-slate-900 text-slate-300">
       <TopNavbar />
-      <div id="sidebar-wrapper" class={`fixed top-0 left-0 h-screen transition-all duration-300 ease-in-out ${isSidebarVisible ? 'w-64' : 'w-0'} overflow-hidden`}>
+      <div id="sidebar-wrapper" class="fixed top-0 left-0 h-screen transition-all duration-300 ease-in-out w-0 md:w-64 overflow-hidden">
         <Sidebar />
       </div>
       <div class="flex-1 w-full">
@@ -155,15 +157,27 @@ app.get('/weapon-list', async ({ query }) => {
   }
 })
 
-app.post('/toggle-sidebar', () => {
-  isSidebarVisible = !isSidebarVisible;
-  return (
-    <div id="sidebar-wrapper" class={`fixed top-0 left-0 h-screen transition-all duration-300 ease-in-out ${isSidebarVisible ? 'w-64' : 'w-0'} overflow-hidden`}>
-      <Sidebar />
-    </div>
-  )
+app.post('/toggle-sidebar', ({ headers }) => {
+  // Simple detection of mobile vs desktop
+  const userAgent = headers['user-agent'] || '';
+  const isMobile = /Mobi|Android|iPhone|iPad/i.test(userAgent) || (headers['sec-ch-ua-mobile'] === '?1');
+  
+  if (isMobile) {
+    isSidebarVisibleMobile = !isSidebarVisibleMobile;
+    return (
+      <div id="sidebar-wrapper" class={`fixed top-0 left-0 h-screen transition-all duration-300 ease-in-out ${isSidebarVisibleMobile ? 'w-64' : 'w-0'} md:w-64 overflow-hidden`}>
+        <Sidebar />
+      </div>
+    );
+  } else {
+    isSidebarVisibleDesktop = !isSidebarVisibleDesktop;
+    return (
+      <div id="sidebar-wrapper" class={`fixed top-0 left-0 h-screen transition-all duration-300 ease-in-out w-0 md:${isSidebarVisibleDesktop ? 'w-64' : 'w-0'} overflow-hidden`}>
+        <Sidebar />
+      </div>
+    );
+  }
 })
-
 
 const UnderConstruction = ({ page }: { page: string }) => (
   <Layout>
