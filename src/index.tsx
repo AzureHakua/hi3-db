@@ -16,6 +16,23 @@ import { WeaponList } from './components/WeaponList'
 let isSidebarVisibleMobile = false;  // Hidden by default on mobile
 let isSidebarVisibleDesktop = true;   // Shown by default on desktop
 
+// Create a separate API-only app for Swagger (no prefix since routes already have it)
+const apiApp = new Elysia()
+  .use(cors())
+  .use(swagger({
+    documentation: {
+      info: {
+        title: 'Honkai Impact 3rd Database API',
+        version: '1.0.0',
+        description: 'API for Honkai Impact 3rd game data'
+      }
+    },
+    path: '/swagger'
+  }))
+  .use(stigmataRoutes)
+  .use(weaponRoutes)
+
+// Create the main app without Swagger
 const app = new Elysia()
   .use(html())
   .use(cors())
@@ -29,10 +46,10 @@ const app = new Elysia()
       autoprefixer: false
     }
   }))
-  .use(swagger())
   .use(staticPlugin())
-  .use(stigmataRoutes)
-  .use(weaponRoutes)
+
+// Mount the API app
+app.mount('/', apiApp)
 
 const Layout = ({ children }: { children: JSX.Element }) => (
   <html lang="en">
@@ -61,6 +78,11 @@ app.get('/', () => (
     <>
       <h1 class="text-3xl font-bold mb-4 text-center">Welcome to Prometheus DB</h1>
       <p class="text-center">A (WIP) database for Honkai Impact 3rd</p>
+      <div class="text-center mt-4">
+        <a href="/swagger" class="text-blue-400 hover:text-blue-300 underline">
+          View API Documentation
+        </a>
+      </div>
     </>
   </Layout>
 ))
@@ -194,5 +216,10 @@ app.get('/about', () => <UnderConstruction page="About" />)
 
 app.listen(3000)
 
+const hostname = app.server?.hostname || 'localhost';
+const port = app.server?.port || 3000;
+const protocol = process.env.NODE_ENV === 'production' ? 'https' : 'http';
+
 console.log('Static files being served from:', process.cwd() + '/public');
-console.log(`🦊 Elysia is running at ${app.server?.hostname}:${app.server?.port}`);
+console.log(`🦊 Elysia is running at ${protocol}://${hostname}:${port}`);
+console.log(`📚 API Documentation available at: ${protocol}://${hostname}:${port}/swagger`);
