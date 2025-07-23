@@ -41,7 +41,7 @@ const checkAuth = ({ headers }: { headers: { authorization: string } }) => {
 export const getStigmata = async ({ query }: { query: any }) => {
   console.log('getStigmata called with query:', query)
   let stigmataData;
-  const limit = query.limit ? Number(query.limit) : 10; // Default to 10 if not specified
+  const limit = query.limit ? Number(query.limit) : 10; // limit result in case of fetching large amounts of data
 
   if (query.name?.$like) {
     const searchTerm = query.name.$like.replace(/%/g, '');
@@ -59,7 +59,7 @@ export const getStigmata = async ({ query }: { query: any }) => {
     // If 'id' is provided, fetch the stigmata with the given ID
     stigmataData = await db.select().from(stigmata).where(eq(stigmata.id, Number(query.id)));
   } else {
-    // If no specific query parameters are provided, fetch all stigmata
+    // If no specific query parameters are provided, fetch all stigmata (note default limit is 10)
     stigmataData = await db.select().from(stigmata).limit(limit).all();
   }
 
