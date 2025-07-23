@@ -36,7 +36,7 @@ const checkAuth = ({ headers }: { headers: { authorization: string } }) => {
 export const getWeapon = async ({ query }: { query: any }) => {
   console.log('getWeapon called with query:', query)
   let weaponData;
-  const limit = query.limit ? Number(query.limit) : 10; // Default to 10 if not specified
+  const limit = query.limit ? Number(query.limit) : 10; // limit result in case of fetching large amounts of data
 
   if (query.name?.$like) {
     const searchTerm = query.name.$like.replace(/%/g, '');
@@ -53,7 +53,7 @@ export const getWeapon = async ({ query }: { query: any }) => {
   } else if (query.id) {
     weaponData = await db.select().from(weapon).where(eq(weapon.id, Number(query.id)));
   } else {
-    weaponData = await db.select().from(weapon).limit(limit).all();
+    weaponData = await db.select().from(weapon).limit(limit).all(); // note default limit
   }
 
   // Fetch related data for each weapon
