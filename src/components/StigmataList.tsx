@@ -1,4 +1,4 @@
-import { html, Html } from '@elysiajs/html'
+import { Html } from '@elysiajs/html'
 import { SelectStigmata } from '../backend/db/schema'
 import { Stigma } from './Stigma'
 
