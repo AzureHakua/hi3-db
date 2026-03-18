@@ -1,5 +1,5 @@
-import { html, Html } from '@elysiajs/html'
-import { SelectWeapon, weapon } from '../backend/db/schema'
+import { Html } from '@elysiajs/html'
+import { SelectWeapon } from '../backend/db/schema'
 import { Weapon } from './Weapon'
 
 export function WeaponList({ weapons }: { weapons: SelectWeapon[] }) {
