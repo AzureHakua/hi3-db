@@ -19,22 +19,6 @@ import './styles/tailwind.css'
 let isSidebarVisibleMobile = false;  // Hidden by default on mobile
 let isSidebarVisibleDesktop = true;   // Shown by default on desktop
 
-// Create a separate API-only app for OpenAPI
-const apiApp = new Elysia()
-  .use(cors())
-  .use(openapi({
-    documentation: {
-      info: {
-        title: 'Prometheus Database API',
-        version: '1.1.0',
-        description: 'An API for Honkai Impact 3rd game data'
-      }
-    },
-    path: '/openapi'
-  }))
-  .use(stigmataRoutes)
-  .use(weaponRoutes)
-
 // Create the main app
 const app = new Elysia()
   .use(html())
@@ -53,9 +37,20 @@ const app = new Elysia()
     assets: './public',
     prefix: '/'
   }))
-  .use(apiApp)
+  .use(openapi({
+    documentation: {
+      info: {
+        title: 'Prometheus Database API',
+        version: '1.1.0',
+        description: 'An API for Honkai Impact 3rd game data'
+      }
+    },
+    path: '/openapi'
+  }))
+  .use(stigmataRoutes)
+  .use(weaponRoutes)
   .get('/favicon.ico', () => file('public/favicon.ico'))
-  .get('/img/*', ({ params }) => file(`public/img/${params['*']}`))
+  .get('/img/*', ({ params }) => file(`public/img/${params['*']}`), { detail: { hide: true } })
 
 // Layout Information
 const Layout = ({ children }: { children: JSX.Element }) => (
@@ -144,10 +139,10 @@ app.get('/', async () => {
       </>
     </Layout>
   )
-})
+}, { detail: { hide: true } })
 
 // Valkyries Page
-app.get('/valkyries', () => <UnderConstruction page="Valkyries" />)
+app.get('/valkyries', () => <UnderConstruction page="Valkyries" />, { detail: { hide: true } })
 
 // Weapons Page
 app.get('/weapons', () => (
@@ -168,7 +163,7 @@ app.get('/weapons', () => (
       <div id="weapon-list" hx-get='/weapon-list' hx-trigger='load'></div>
     </>
   </Layout>
-))
+), { detail: { hide: true } })
 
 app.get('/weapon-list', async ({ query }) => {
   try {
@@ -183,7 +178,7 @@ app.get('/weapon-list', async ({ query }) => {
     console.error('Error fetching weapons:', error);
     return <div class="text-slate-200">Error fetching weapons data</div>;
   }
-})
+}, { detail: { hide: true } })
 
 // Stigmata Page
 app.get('/stigmata', () => (
@@ -204,7 +199,7 @@ app.get('/stigmata', () => (
       <div id="stigmata-list" hx-get='/stigmata-list' hx-trigger='load'></div>
     </>
   </Layout>
-))
+), { detail: { hide: true } })
 
 app.get('/stigmata-list', async ({ query }) => {
   try {
@@ -219,7 +214,7 @@ app.get('/stigmata-list', async ({ query }) => {
     console.error('Error fetching stigmata:', error);
     return <div class="text-slate-200">Error fetching stigmata data</div>;
   }
-})
+}, { detail: { hide: true } })
 
 app.get('/stigmata/:id/position/:index', async ({ params }) => {
   const stigmata = await getStigmata({ query: { id: Number(params.id) } });
@@ -241,9 +236,9 @@ app.get('/stigmata/:id/position/:index', async ({ params }) => {
       )}
     </div>
   );
-})
+}, { detail: { hide: true } })
 
-app.get('/astralops-elfs', () => <UnderConstruction page="AstralOps" />)
+app.get('/astralops-elfs', () => <UnderConstruction page="AstralOps" />, { detail: { hide: true } })
 
 // About Page
 app.get('/about', () => (
@@ -312,7 +307,7 @@ app.get('/about', () => (
       </div>
     </>
   </Layout>
-))
+), { detail: { hide: true } })
 
 const UnderConstruction = ({ page }: { page: string }) => (
   <Layout>
@@ -344,7 +339,7 @@ app.post('/toggle-sidebar', ({ headers }) => {
       </div>
     );
   }
-})
+}, { detail: { hide: true } })
 
 app.listen(3000)
 
