@@ -19,7 +19,7 @@ import './styles/tailwind.css'
 let isSidebarVisibleMobile = false;  // Hidden by default on mobile
 let isSidebarVisibleDesktop = true;   // Shown by default on desktop
 
-// Create a separate API-only app for Swagger
+// Create a separate API-only app for OpenAPI
 const apiApp = new Elysia()
   .use(cors())
   .use(openapi({
@@ -53,11 +53,9 @@ const app = new Elysia()
     assets: './public',
     prefix: '/'
   }))
+  .use(apiApp)
   .get('/favicon.ico', () => file('public/favicon.ico'))
   .get('/img/*', ({ params }) => file(`public/img/${params['*']}`))
-
-// Mount the API app
-app.mount('/', apiApp)
 
 // Layout Information
 const Layout = ({ children }: { children: JSX.Element }) => (
@@ -356,4 +354,4 @@ const protocol = process.env.NODE_ENV === 'production' ? 'https' : 'http';
 
 console.log('Static files being served from:', process.cwd() + '/public');
 console.log(`🦊 Elysia is running at ${protocol}://${hostname}:${port}`);
-console.log(`📚 API Documentation available at: ${protocol}://${hostname}:${port}/swagger`);
+console.log(`📚 API Documentation available at: ${protocol}://${hostname}:${port}/openapi`);
