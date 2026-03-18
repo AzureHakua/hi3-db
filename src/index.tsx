@@ -45,12 +45,13 @@ const app = new Elysia()
         description: 'An API for Honkai Impact 3rd game data'
       }
     },
-    path: '/openapi'
+    path: '/openapi',
+    exclude: {paths: ['/*', '/favicon.ico', '/img/*']}
   }))
   .use(stigmataRoutes)
   .use(weaponRoutes)
   .get('/favicon.ico', () => file('public/favicon.ico'))
-  .get('/img/*', ({ params }) => file(`public/img/${params['*']}`), { detail: { hide: true } })
+  .get('/img/*', ({ params }) => file(`public/img/${params['*']}`))
 
 // Layout Information
 const Layout = ({ children }: { children: JSX.Element }) => (
