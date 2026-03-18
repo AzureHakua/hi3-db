@@ -1,4 +1,4 @@
-import { html, Html } from '@elysiajs/html'
+import { Html } from '@elysiajs/html'
 import { SelectWeapon } from '../backend/db/schema'
 
 export function Weapon(props: SelectWeapon) {
