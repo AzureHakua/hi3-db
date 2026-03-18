@@ -1,25 +1,25 @@
-import { Elysia } from 'elysia'
+import { Elysia, file } from 'elysia'
 import { html, Html } from '@elysiajs/html'
 import { cors } from '@elysiajs/cors'
 import { tailwind } from '@gtramontina.com/elysia-tailwind'
-import { swagger } from '@elysiajs/swagger'
+import { openapi } from '@elysiajs/openapi'
 import { staticPlugin } from '@elysiajs/static'
 import { stigmataRoutes, getStigmata } from './backend/routes/stigmata'
 import { weaponRoutes, getWeapon } from './backend/routes/weapons'
 import { StigmataList } from './components/StigmataList'
 import { TopNavbar } from './components/Topbar'
 import { Sidebar } from './components/Sidebar'
-import './styles/tailwind.css'
 import { WeaponList } from './components/WeaponList'
+import './styles/tailwind.css'
 
 // Track sidebar visibility for different screen sizes
 let isSidebarVisibleMobile = false;  // Hidden by default on mobile
 let isSidebarVisibleDesktop = true;   // Shown by default on desktop
 
-// Create a separate API-only app for Swagger (no prefix since routes already have it)
+// Create a separate API-only app for Swagger
 const apiApp = new Elysia()
   .use(cors())
-  .use(swagger({
+  .use(openapi({
     documentation: {
       info: {
         title: 'Honkai Impact 3rd Database API',
@@ -27,26 +27,31 @@ const apiApp = new Elysia()
         description: 'API for Honkai Impact 3rd game data'
       }
     },
-    path: '/swagger'
+    path: '/openapi'
   }))
   .use(stigmataRoutes)
   .use(weaponRoutes)
 
-// Create the main app without Swagger
+// Create the main app
 const app = new Elysia()
   .use(html())
   .use(cors())
   .use(tailwind({
-    path: "/styles/stylesheet.css",
-    source: "./src/styles/tailwind.css",
-    config: "./tailwind.config.js",
+    path: '/styles/stylesheet.css',
+    source: './src/styles/tailwind.css',
+    config: './tailwind.config.js',
     options: {
       minify: true,
       map: true,
       autoprefixer: false
     }
   }))
-  .use(staticPlugin())
+  .use(staticPlugin({
+    assets: './public',
+    prefix: '/'
+  }))
+  .get('/favicon.ico', () => file('public/favicon.ico'))
+  .get('/img/*', ({ params }) => file(`public/img/${params['*']}`))
 
 // Mount the API app
 app.mount('/', apiApp)
@@ -54,7 +59,8 @@ app.mount('/', apiApp)
 const Layout = ({ children }: { children: JSX.Element }) => (
   <html lang="en">
     <head>
-      <title>Hi~ Elysia</title>
+      <title>Prometheus DB</title>
+      <link href="/favicon.ico" rel="icon" />
       <link href="/styles/stylesheet.css" rel="stylesheet" />
       <script src="https://unpkg.com/htmx.org@2.0.2"></script>
       <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -79,7 +85,7 @@ app.get('/', () => (
       <h1 class="text-3xl font-bold mb-4 text-center">Welcome to Prometheus DB</h1>
       <p class="text-center">A (WIP) database for Honkai Impact 3rd</p>
       <div class="text-center mt-4">
-        <a href="/swagger" class="text-blue-400 hover:text-blue-300 underline">
+        <a href="/openapi" class="text-blue-400 hover:text-blue-300 underline">
           View API Documentation
         </a>
       </div>
