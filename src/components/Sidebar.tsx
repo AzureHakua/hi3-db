@@ -9,7 +9,7 @@ export const Sidebar = () => (
             { name: "Valkyries", path: "/valkyries" },
             { name: "Weapons", path: "/weapons" },
             { name: "Stigmata", path: "/stigmata" },
-            { name: "AstralOps", path: "/astralops-elfs" },
+            { name: "AstralOps", path: "/astralops" },
             { name: "About", path: "/about" }
           ].map(item => (
             <li>

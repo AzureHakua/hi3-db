@@ -6,6 +6,7 @@ import { openapi } from '@elysiajs/openapi'
 import { staticPlugin } from '@elysiajs/static'
 import { stigmataRoutes, getStigmata } from './backend/routes/stigmata'
 import { weaponRoutes, getWeapon } from './backend/routes/weapons'
+import { astralOpRoutes, getAstralOp } from './backend/routes/astralops'
 import { StigmataList } from './components/StigmataList'
 import { WeaponList } from './components/WeaponList'
 import { db } from './backend/db'
@@ -50,6 +51,7 @@ const app = new Elysia()
   }))
   .use(stigmataRoutes)
   .use(weaponRoutes)
+  .use(astralOpRoutes)
   .get('/favicon.ico', () => file('public/favicon.ico'))
   .get('/img/*', ({ params }) => file(`public/img/${params['*']}`))
 
@@ -100,7 +102,7 @@ app.get('/', async () => {
             { name: "Valkyries", path: "/valkyries", icon: "/img/ui/valkyries.png" },
             { name: "Weapons", path: "/weapons", icon: "/img/ui/weapons.png" },
             { name: "Stigmata", path: "/stigmata", icon: "/img/ui/stigmata.png" },
-            { name: "AstralOps", path: "/astralops-elfs", icon: "/img/ui/astral-ops.png" },
+            { name: "AstralOps", path: "/astralops", icon: "/img/ui/astral-ops.png" },
           ].map((card) => (
             <a href={card.path} class="flex flex-col items-center justify-between bg-slate-700 hover:bg-slate-600 border border-slate-600 hover:border-violet-400 rounded-xl p-4 h-48 transition-all duration-200">
               <img src={card.icon} alt={card.name} class="w-[120px] h-[120px] object-contain p-2" />
@@ -239,7 +241,7 @@ app.get('/stigmata/:id/position/:index', async ({ params }) => {
   );
 }, { detail: { hide: true } })
 
-app.get('/astralops-elfs', () => <UnderConstruction page="AstralOps" />, { detail: { hide: true } })
+app.get('/astralops', () => <UnderConstruction page="AstralOps" />, { detail: { hide: true } })
 
 // About Page
 app.get('/about', () => (
