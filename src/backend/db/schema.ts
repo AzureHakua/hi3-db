@@ -111,5 +111,9 @@ export const astralOpSkills = sqliteTable('astralop_skills', {
 export type InsertAstralOp = typeof astralop.$inferInsert;
 export type SelectAstralOp = typeof astralop.$inferSelect & {
   specializations: typeof astralOpSpecializations.$inferSelect[];
-  skills: typeof astralOpSkills.$inferSelect[];
+  skills: {
+    synergy: typeof astralOpSkills.$inferSelect[];
+    recharge: typeof astralOpSkills.$inferSelect[];
+    passive: typeof astralOpSkills.$inferSelect[];
+  };
 };

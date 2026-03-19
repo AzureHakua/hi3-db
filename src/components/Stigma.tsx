@@ -8,9 +8,9 @@ export function Stigma(props: SelectStigmata) {
   return (
     <div class="bg-slate-700 shadow-lg rounded-lg overflow-hidden">
       <div class="flex flex-col md:grid md:grid-cols-2">
-        
+
         <div class="mx-4 mt-4">
-          
+
           <div class="flex items-center justify-between my-3 px-3">
             <hr class="w-full border-slate-600"></hr>
             <div class="font-semibold rounded-full border text-slate-300 py-1 px-3 mx-auto whitespace-nowrap">{name}</div>
@@ -33,18 +33,27 @@ export function Stigma(props: SelectStigmata) {
         <div class="mx-4 mt-4">
 
           <div class="grid grid-cols-1 gap-4 whitespace-nowrap">
-            <div class="grid grid-cols-3 gap-4 mt-4 mx-10">
+            <div class="grid grid-cols-3 gap-4 mt-4 mx-24">
               {positions && positions.map((pos, index) => (
-                <div data-key={index} class={`${positions.length === 1 ? 'col-start-2' : ''} relative rounded-full aspect-[3/1] border-2 border-slate-400 hover:scale-105 hover:border-slate-100 transition-all duration-[0.25] ease-[ease-in-out] cursor-pointer`}
+                <div data-key={index}
+                  class={`relative rounded-full aspect-[3/1] border-2 transition-all duration-200 cursor-pointer
+                    ${positions.length === 1 ? 'col-start-2' : ''}
+                    ${index === 0
+                      ? 'border-violet-400 bg-violet-400/30'
+                      : 'border-slate-400 bg-slate-600 hover:scale-105 hover:border-slate-100'
+                    }`}
                   id={`icon-${id}-${index}`}
                   hx-get={`/stigmata/${props.id}/position/${index}`}
                   hx-target={`#content-container-${id}`}
-                  hx-swap="innerHTML">
-                  <div class="bg-slate-300 text-indigo-700 text-lg font-bold rounded-full absolute w-full h-full flex items-center justify-center">{pos.position}</div>
+                  hx-swap="innerHTML transition:true">
+                  <div class={`text-lg font-bold rounded-full absolute w-full h-full flex items-center justify-center
+                    ${index === 0 ? 'text-violet-300' : 'text-slate-300'}`}>
+                    {pos.position}
+                  </div>
                 </div>
               ))}
             </div>
-            
+
 
             <div id={`content-container-${id}`}>
               {positions && positions.map((pos, index) => (
