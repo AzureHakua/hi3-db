@@ -21,6 +21,7 @@ export function StigmataList({ stigmata, hasMore, hasFlags, offset, search }: {
         hx-swap="beforeend"
         hx-include="#search-input"
         hx-vals={`{"offset": "${newOffset}"}`}
+        hx-on--after-swap="htmx.process(document.getElementById('stigmata-items'))"
       >
         Load More
       </button>

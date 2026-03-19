@@ -46,22 +46,21 @@ function parseSearchQuery(input: string) {
     single: false,
     set: false,
     more: false,
+    all: false,
   }
 
-  // Extract boolean flags
   flags.single = /(-single|-1)\b/.test(input)
   flags.set = /(-set|-3)\b/.test(input)
   flags.more = input.includes('-more')
-  input = input.replace(/(-single|-1|-set|-3|-more)\b/g, '').trim()
+  flags.all = input.includes('-all')
+  input = input.replace(/(-single|-1|-set|-3|-more|-all)\b/g, '').trim()
 
-  // Extract -effect with optional quotes
   const effectMatch = input.match(/-effect\s+"([^"]+)"|-effect\s+(\S+)/)
   if (effectMatch) {
     flags.effect = effectMatch[1] || effectMatch[2]
     input = input.replace(effectMatch[0], '').trim()
   }
 
-  // Extract -id
   const idMatch = input.match(/-id\s+(\d+)/)
   if (idMatch) {
     flags.id = Number(idMatch[1])
@@ -87,8 +86,9 @@ export const getStigmata = async ({ query }: { query: any }) => {
 
   const searchTerm = query.name?.$like?.replace(/%/g, '') || query.name?.replace(/\+/g, ' ') || '';
   const flags = parseSearchQuery(searchTerm);
-  const useLoadMore = flags.single || flags.set || flags.more || !!flags.effect || !!flags.id;
-  const fetchLimit = flags.effect ? 999 : limit + 1;
+  const useLoadMore = flags.more || !!flags.id;
+  const fetchAll = flags.effect || flags.all || flags.set || flags.single;
+  const fetchLimit = fetchAll ? 999 : limit + 1;
 
   if (flags.id) {
     stigmataData = await db.select().from(stigmata).where(eq(stigmata.id, flags.id));
@@ -97,14 +97,14 @@ export const getStigmata = async ({ query }: { query: any }) => {
       .from(stigmata)
       .where(like(stigmata.name, `%${flags.name}%`))
       .orderBy(desc(stigmata.id))
-      .limit(flags.effect ? 999 : (useLoadMore ? fetchLimit : limit))
-      .offset(flags.effect ? 0 : offset);
+      .limit(fetchAll ? 999 : (useLoadMore ? fetchLimit : limit))
+      .offset(fetchAll ? 0 : offset);
   } else {
     stigmataData = await db.select()
       .from(stigmata)
       .orderBy(desc(stigmata.id))
-      .limit(flags.effect ? 999 : (useLoadMore ? fetchLimit : limit))
-      .offset(flags.effect ? 0 : offset)
+      .limit(fetchAll ? 999 : (useLoadMore ? fetchLimit : limit))
+      .offset(fetchAll ? 0 : offset)
       .all();
   }
 
@@ -120,12 +120,14 @@ export const getStigmata = async ({ query }: { query: any }) => {
       s.setEffects?.twoPieceEffect?.toLowerCase().includes(term) ||
       s.setEffects?.threePieceEffect?.toLowerCase().includes(term)
     );
+  }
+
+  if (flags.single || flags.set || flags.effect || flags.all) {
     return { data: fullData, hasMore: false, hasFlags: true };
   }
 
   const hasMore = useLoadMore && fullData.length > limit;
   if (hasMore) fullData = fullData.slice(0, limit);
-
   return { data: fullData, hasMore, hasFlags: useLoadMore };
 }
 
