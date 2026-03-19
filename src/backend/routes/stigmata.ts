@@ -1,7 +1,7 @@
 import { Elysia, t } from 'elysia'
 import { db } from '../db'
 import { stigmata, stigmataPositions, stigmataStats, stigmataImages, stigmataSetEffects } from '../db/schema'
-import { eq, and, like } from 'drizzle-orm'
+import { eq, and, like, desc } from 'drizzle-orm'
 import { sql } from 'drizzle-orm';
 
 const API_KEY = process.env.API_KEY
@@ -38,33 +38,100 @@ const checkAuth = ({ headers }: { headers: { authorization: string } }) => {
  * @param {Object} params.query - The query parameters.
  * @returns {Array} An array of stigmata objects.
  */
-export const getStigmata = async ({ query }: { query: any }) => {
-  console.log('getStigmata called with query:', query)
-  let stigmataData;
-  const limit = query.limit ? Number(query.limit) : 10; // limit result in case of fetching large amounts of data
-
-  if (query.name?.$like) {
-    const searchTerm = query.name.$like.replace(/%/g, '');
-    stigmataData = await db.select()
-      .from(stigmata)
-      .where(like(stigmata.name, `%${searchTerm}%`))
-      .limit(limit);
-  } else if (query.name) {
-    const searchTerm = query.name.replace(/\+/g, ' ');
-    stigmataData = await db.select()
-      .from(stigmata)
-      .where(like(stigmata.name, `%${searchTerm}%`))
-      .limit(limit);
-  } else if (query.id) {
-    // If 'id' is provided, fetch the stigmata with the given ID
-    stigmataData = await db.select().from(stigmata).where(eq(stigmata.id, Number(query.id)));
-  } else {
-    // If no specific query parameters are provided, fetch all stigmata (note default limit is 10)
-    stigmataData = await db.select().from(stigmata).limit(limit).all();
+function parseSearchQuery(input: string) {
+  const flags = {
+    name: '',
+    effect: '',
+    id: null as number | null,
+    single: false,
+    set: false,
+    more: false,
   }
 
-  // Fetch related data for each stigmata
-  const fullData = await Promise.all(stigmataData.map(async (s) => {
+  // Extract boolean flags
+  flags.single = /(-single|-1)\b/.test(input)
+  flags.set = /(-set|-3)\b/.test(input)
+  flags.more = input.includes('-more')
+  input = input.replace(/(-single|-1|-set|-3|-more)\b/g, '').trim()
+
+  // Extract -effect with optional quotes
+  const effectMatch = input.match(/-effect\s+"([^"]+)"|-effect\s+(\S+)/)
+  if (effectMatch) {
+    flags.effect = effectMatch[1] || effectMatch[2]
+    input = input.replace(effectMatch[0], '').trim()
+  }
+
+  // Extract -id
+  const idMatch = input.match(/-id\s+(\d+)/)
+  if (idMatch) {
+    flags.id = Number(idMatch[1])
+    input = input.replace(idMatch[0], '').trim()
+  }
+
+  flags.name = input.trim()
+  return flags
+}
+
+export const getStigmata = async ({ query }: { query: any }) => {
+  console.log('getStigmata called with query:', query)
+  const limit = query.limit ? Number(query.limit) : 10;
+  const offset = query.offset ? Number(query.offset) : 0;
+
+  let stigmataData;
+
+  if (query.id) {
+    stigmataData = await db.select().from(stigmata).where(eq(stigmata.id, Number(query.id)));
+    const fullData = await getFullStigmataData(stigmataData);
+    return { data: fullData, hasMore: false, hasFlags: false };
+  }
+
+  const searchTerm = query.name?.$like?.replace(/%/g, '') || query.name?.replace(/\+/g, ' ') || '';
+  const flags = parseSearchQuery(searchTerm);
+  const useLoadMore = flags.single || flags.set || flags.more || !!flags.effect || !!flags.id;
+  const fetchLimit = flags.effect ? 999 : limit + 1;
+
+  if (flags.id) {
+    stigmataData = await db.select().from(stigmata).where(eq(stigmata.id, flags.id));
+  } else if (flags.name) {
+    stigmataData = await db.select()
+      .from(stigmata)
+      .where(like(stigmata.name, `%${flags.name}%`))
+      .orderBy(desc(stigmata.id))
+      .limit(flags.effect ? 999 : (useLoadMore ? fetchLimit : limit))
+      .offset(flags.effect ? 0 : offset);
+  } else {
+    stigmataData = await db.select()
+      .from(stigmata)
+      .orderBy(desc(stigmata.id))
+      .limit(flags.effect ? 999 : (useLoadMore ? fetchLimit : limit))
+      .offset(flags.effect ? 0 : offset)
+      .all();
+  }
+
+  let fullData = await getFullStigmataData(stigmataData);
+
+  // Post-filter
+  if (flags.single) fullData = fullData.filter(s => s.positions.length === 1);
+  if (flags.set) fullData = fullData.filter(s => s.positions.length === 3);
+  if (flags.effect) {
+    const term = flags.effect.toLowerCase();
+    fullData = fullData.filter(s =>
+      s.positions.some((p: typeof stigmataPositions.$inferSelect) => p.skillDescription?.toLowerCase().includes(term)) ||
+      s.setEffects?.twoPieceEffect?.toLowerCase().includes(term) ||
+      s.setEffects?.threePieceEffect?.toLowerCase().includes(term)
+    );
+    return { data: fullData, hasMore: false, hasFlags: true };
+  }
+
+  const hasMore = useLoadMore && fullData.length > limit;
+  if (hasMore) fullData = fullData.slice(0, limit);
+
+  return { data: fullData, hasMore, hasFlags: useLoadMore };
+}
+
+// Extract full data fetching into reusable function
+const getFullStigmataData = async (stigmataData: any[]) => {
+  return await Promise.all(stigmataData.map(async (s) => {
     let positionsData = await db.select().from(stigmataPositions).where(eq(stigmataPositions.stigmataId, s.id));
 
     const positionsWithStats = await Promise.all(positionsData.map(async (p) => {
@@ -82,8 +149,6 @@ export const getStigmata = async ({ query }: { query: any }) => {
       setEffects: setEffectsData[0],
     };
   }));
-
-  return fullData;
 }
 
 /**
@@ -310,7 +375,7 @@ export const patchStigmata = async ({ params, body }: { params: { id: number }, 
  */
 export const deleteStigmata = async ({ params }: { params: { id: number } }) => {
   console.log('deleteStigmata called', params);
-  
+
   await db.transaction(async (tx) => {
     // First, get all position IDs for this stigmata
     const positions = await tx.select({ id: stigmataPositions.id })
@@ -324,20 +389,20 @@ export const deleteStigmata = async ({ params }: { params: { id: number } }) => 
 
     // Delete positions
     await tx.delete(stigmataPositions).where(eq(stigmataPositions.stigmataId, params.id));
-    
+
     // Delete images
     await tx.delete(stigmataImages).where(eq(stigmataImages.stigmataId, params.id));
-    
+
     // Delete set effects
     await tx.delete(stigmataSetEffects).where(eq(stigmataSetEffects.stigmataId, params.id));
-    
+
     // Finally, delete the main stigmata record
     await tx.delete(stigmata).where(eq(stigmata.id, params.id));
-    
+
     // Reset auto-increment counters
     await tx.run(sql`DELETE FROM sqlite_sequence WHERE name IN ('stigmata', 'stigmata_positions', 'stigmata_stats', 'stigmata_images', 'stigmata_set_effects')`);
   });
-  
+
   return { success: true };
 }
 
@@ -354,6 +419,7 @@ export const stigmataRoutes = new Elysia({ prefix: '/api' })
       id: t.Optional(t.Numeric()),
       name: t.Optional(t.String()),
       limit: t.Optional(t.Numeric()),
+      offset: t.Optional(t.Numeric()),
     }),
   })
   /**

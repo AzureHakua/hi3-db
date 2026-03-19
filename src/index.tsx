@@ -11,15 +11,11 @@ import { StigmataList } from './components/StigmataList'
 import { WeaponList } from './components/WeaponList'
 import { AstralOpList } from './components/AstralOpList'
 import { db } from './backend/db'
-import { weapon, stigmata, astralop } from './backend/db/schema'
+import { weapon, stigmata, astralop, stigmataPositions, stigmataImages } from './backend/db/schema'
 import { sql } from 'drizzle-orm'
 import { TopNavbar } from './components/Topbar'
 import { Sidebar } from './components/Sidebar'
 import './styles/tailwind.css'
-
-// Track sidebar visibility for different screen sizes
-let isSidebarVisibleMobile = false;  // Hidden by default on mobile
-let isSidebarVisibleDesktop = true;   // Shown by default on desktop
 
 // Create the main app
 const app = new Elysia()
@@ -170,6 +166,7 @@ app.get('/valkyries', () => <UnderConstruction page="Valkyries" />, { detail: { 
 app.get('/weapons', () => (
   <Layout>
     <>
+      <h1 class="text-3xl font-bold mb-2 text-center">Weapons</h1>
       <div class="flex justify-center m-4">
         <input
           type="text"
@@ -180,6 +177,7 @@ app.get('/weapons', () => (
           hx-trigger="keyup changed delay:500ms"
           hx-get="/weapon-list"
           hx-target="#weapon-list"
+          hx-swap="innerHTML transition:true"
         />
       </div>
       <div id="weapon-list" hx-get='/weapon-list' hx-trigger='load'></div>
@@ -206,19 +204,28 @@ app.get('/weapon-list', async ({ query }) => {
 app.get('/stigmata', () => (
   <Layout>
     <>
+      <h1 class="text-3xl font-bold mb-2 text-center">Stigmata</h1>
       <div class="flex justify-center m-4">
-        <input
-          type="text"
-          id="search-input"
-          name="search"
-          placeholder="Search stigmata..."
-          class="max-w-4xl 3xl:max-w-screen-xl w-full p-2 my-2 rounded-md bg-slate-800 text-white"
-          hx-trigger="keyup changed delay:500ms"
-          hx-get="/stigmata-list"
-          hx-target="#stigmata-list"
-        />
+        <div class="relative max-w-4xl 3xl:max-w-screen-xl w-full">
+          <input
+            type="text"
+            id="search-input"
+            name="search"
+            placeholder="Search stigmata..."
+            class="w-full p-2 my-2 rounded-md bg-slate-800 text-white"
+            hx-trigger="keyup changed delay:500ms"
+            hx-get="/stigmata-list"
+            hx-target="#stigmata-list"
+            hx-swap="innerHTML transition:true"
+            hx-indicator="#search-indicator"
+            hx-on--before-request="document.getElementById('stigmata-list').innerHTML=''"
+          />
+          <span id="search-indicator" class="htmx-indicator absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm searching-pulse">
+            Searching...
+          </span>
+        </div>
       </div>
-      <div id="stigmata-list" hx-get='/stigmata-list' hx-trigger='load'></div>
+      <div id="stigmata-list" hx-get='/stigmata-list' hx-trigger='load' hx-target="#stigmata-list" hx-swap="innerHTML transition:true"></div>
     </>
   </Layout>
 ), { detail: { hide: true } })
@@ -226,12 +233,20 @@ app.get('/stigmata', () => (
 app.get('/stigmata-list', async ({ query }) => {
   try {
     const searchTerm = query.search as string || '';
-    const stigmata = await getStigmata({
+    const offset = query.offset ? Number(query.offset) : 0;
+    const result = await getStigmata({
       query: {
-        name: searchTerm ? { $like: `%${searchTerm}%` } : undefined
+        name: searchTerm ? { $like: `%${searchTerm}%` } : undefined,
+        offset,
       }
     });
-    return <StigmataList stigmata={stigmata} />;
+    return <StigmataList 
+      stigmata={result.data} 
+      hasMore={result.hasMore}
+      hasFlags={result.hasFlags}
+      offset={offset}
+      search={searchTerm}
+    />;
   } catch (error) {
     console.error('Error fetching stigmata:', error);
     return <div class="text-slate-200">Error fetching stigmata data</div>;
@@ -239,15 +254,15 @@ app.get('/stigmata-list', async ({ query }) => {
 }, { detail: { hide: true } })
 
 app.get('/stigmata/:id/position/:index', async ({ params }) => {
-  const stigmata = await getStigmata({ query: { id: Number(params.id) } });
-  if (stigmata.length === 0) return 'Stigmata not found';
+  const result = await getStigmata({ query: { id: Number(params.id) } });
+  if (result.data.length === 0) return 'Stigmata not found';
 
-  const stigma = stigmata[0];
+  const stigma = result.data[0];
   const pos = stigma.positions[Number(params.index)];
 
   return (
     <>
-      {stigma.positions.map((_, i) => (
+      {stigma.positions.map((_: typeof stigmataPositions.$inferSelect, i: number) => (
         <div id={`icon-${stigma.id}-${i}`} hx-swap-oob="outerHTML">
           <div
             data-key={i}
@@ -270,7 +285,7 @@ app.get('/stigmata/:id/position/:index', async ({ params }) => {
       ))}
       {stigma.images && stigma.images.length > 0 && (
         <div class="rounded-none border-2 border-slate-400 overflow-hidden aspect-square mx-4 md:mx-10 flex">
-          <img src={stigma.images.find(img => img.position === pos.position)?.imgUrl ?? ''}
+          <img src={stigma.images.find((img: typeof stigmataImages.$inferSelect) => img.position === pos.position)?.imgUrl ?? ''}
             alt={`${stigma.name} ${pos.position}`}
             class="object-cover rounded w-full h-full"
             loading="lazy"
@@ -284,6 +299,7 @@ app.get('/stigmata/:id/position/:index', async ({ params }) => {
 app.get('/astralops', () => (
   <Layout>
     <>
+      <h1 class="text-3xl font-bold mb-2 text-center">AstralOps</h1>
       <div class="flex justify-center m-4">
         <input
           type="text"
@@ -415,8 +431,8 @@ app.get('/about', () => (
               { name: "Bun", url: "https://bun.sh", desc: "JavaScript runtime", icon: "/img/ui/bun.svg" },
               { name: "ElysiaJS", url: "https://elysiajs.com", desc: "Backend framework", icon: "/img/ui/elysiajs.svg" },
               { name: "Turso", url: "https://turso.tech", desc: "SQLite database", icon: "/img/ui/turso.svg" },
-              { name: "Drizzle ORM", url: "https://orm.drizzle.team", desc: "Database ORM", icon: "/img/ui/drizzle-orm.svg" },
               { name: "HTMX", url: "https://htmx.org", desc: "Frontend interactivity", icon: "/img/ui/htmx.svg" },
+              { name: "Drizzle ORM", url: "https://orm.drizzle.team", desc: "Database ORM", icon: "/img/ui/drizzle-orm.svg" },
               { name: "Tailwind CSS", url: "https://tailwindcss.com", desc: "Styling", icon: "/img/ui/tailwind-css.svg" },
             ].map((tech) => (
               <a href={tech.url} target="_blank" class="flex items-center gap-3 bg-slate-600 hover:bg-violet-400/60 border border-slate-500 hover:border-violet-400 rounded-lg p-3 transition-all duration-200">
@@ -443,15 +459,6 @@ const UnderConstruction = ({ page }: { page: string }) => (
     </>
   </Layout>
 )
-
-// Sidebar
-app.post('/toggle-sidebar', () => {
-  return (
-    <div id="sidebar-wrapper" class="fixed top-0 left-0 h-screen transition-all duration-300 ease-in-out overflow-hidden w-64">
-      <Sidebar />
-    </div>
-  )
-}, { detail: { hide: true } })
 
 app.listen(3000)
 
