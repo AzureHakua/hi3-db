@@ -3,7 +3,7 @@ import { Html } from '@elysiajs/html'
 export const Sidebar = () => (
   <aside id="sidebar" class="absolute top-0 left-0 pt-16 px-4 w-full h-full bg-slate-800 overflow-y-auto z-40 overflow-hidden">
       <nav>
-        <ul class="space-y-2">
+        <ul class="space-y-2 text-center">
           {[
             { name: "Home", path: "/" },
             { name: "Valkyries", path: "/valkyries" },

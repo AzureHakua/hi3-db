@@ -74,6 +74,22 @@ const Layout = ({ children }: { children: JSX.Element }) => (
       <div id="sidebar-wrapper" class="fixed top-0 left-0 h-screen transition-all duration-300 ease-in-out w-0 md:w-64 overflow-hidden">
         <Sidebar />
       </div>
+      <script>{`
+        const sidebar = document.getElementById('sidebar-wrapper');
+        const mq = window.matchMedia('(min-width: 1500px)');
+        
+        function toggleSidebar() {
+          const isOpen = sidebar.style.width === '16rem';
+          sidebar.style.width = isOpen ? '0' : '16rem';
+        }
+
+        function updateSidebar(e) {
+          sidebar.style.width = e.matches ? '16rem' : '0';
+        }
+        
+        mq.addEventListener('change', updateSidebar);
+        updateSidebar(mq);
+      `}</script>
       <div class="flex-1 w-full">
         <main class="max-w-4x1 w-full p-20 mx-auto">
           {children}
@@ -429,26 +445,12 @@ const UnderConstruction = ({ page }: { page: string }) => (
 )
 
 // Sidebar
-app.post('/toggle-sidebar', ({ headers }) => {
-  // Simple detection of mobile vs desktop
-  const userAgent = headers['user-agent'] || '';
-  const isMobile = /Mobi|Android|iPhone|iPad/i.test(userAgent) || (headers['sec-ch-ua-mobile'] === '?1');
-
-  if (isMobile) {
-    isSidebarVisibleMobile = !isSidebarVisibleMobile;
-    return (
-      <div id="sidebar-wrapper" class={`fixed top-0 left-0 h-screen transition-all duration-300 ease-in-out ${isSidebarVisibleMobile ? 'w-64' : 'w-0'} md:w-64 overflow-hidden`}>
-        <Sidebar />
-      </div>
-    );
-  } else {
-    isSidebarVisibleDesktop = !isSidebarVisibleDesktop;
-    return (
-      <div id="sidebar-wrapper" class={`fixed top-0 left-0 h-screen transition-all duration-300 ease-in-out w-0 md:${isSidebarVisibleDesktop ? 'w-64' : 'w-0'} overflow-hidden`}>
-        <Sidebar />
-      </div>
-    );
-  }
+app.post('/toggle-sidebar', () => {
+  return (
+    <div id="sidebar-wrapper" class="fixed top-0 left-0 h-screen transition-all duration-300 ease-in-out overflow-hidden w-64">
+      <Sidebar />
+    </div>
+  )
 }, { detail: { hide: true } })
 
 app.listen(3000)
