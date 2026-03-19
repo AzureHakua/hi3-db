@@ -52,6 +52,7 @@ export type SelectStigmata = typeof stigmata.$inferSelect & {
   setEffects: typeof stigmataSetEffects.$inferSelect;
 };
 
+
 // weapon schemas start here
 export const weapon = sqliteTable('weapon', {
   id: integer('id').primaryKey({ autoIncrement: true }),
@@ -78,4 +79,37 @@ export type InsertWeapon = typeof weapon.$inferInsert;
 export type SelectWeapon = typeof weapon.$inferSelect & {
   images: typeof weaponImages.$inferSelect[];
   skills: typeof weaponSkills.$inferSelect[];
+};
+
+
+// astralop schemas start here
+export const astralop = sqliteTable('astralop', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  name: text('name').notNull(),
+  imgUrl: text('img_url'),
+  damage: text('damage').notNull(),
+});
+
+export const astralOpSpecializations = sqliteTable('astralop_specializations', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  astralOpId: integer('astralop_id').notNull().references(() => astralop.id),
+  spName: text('sp_name').notNull(),
+  spTag: text('sp_tag').notNull(),
+});
+
+export const astralOpSkills = sqliteTable('astralop_skills', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  astralOpId: integer('astralop_id').notNull().references(() => astralop.id),
+  category: text('category').notNull(),
+  skillOrder: integer('skill_order').notNull(),
+  skillName: text('skill_name').notNull(),
+  skillDescription: text('skill_description').notNull(),
+  unlock: text('unlock').notNull(),
+  imgUrl: text('img_url'),
+});
+
+export type InsertAstralOp = typeof astralop.$inferInsert;
+export type SelectAstralOp = typeof astralop.$inferSelect & {
+  specializations: typeof astralOpSpecializations.$inferSelect[];
+  skills: typeof astralOpSkills.$inferSelect[];
 };
