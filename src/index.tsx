@@ -9,8 +9,9 @@ import { weaponRoutes, getWeapon } from './backend/routes/weapons'
 import { astralOpRoutes, getAstralOp } from './backend/routes/astralops'
 import { StigmataList } from './components/StigmataList'
 import { WeaponList } from './components/WeaponList'
+import { AstralOpList } from './components/AstralOpList'
 import { db } from './backend/db'
-import { weapon, stigmata } from './backend/db/schema'
+import { weapon, stigmata, astralop } from './backend/db/schema'
 import { sql } from 'drizzle-orm'
 import { TopNavbar } from './components/Topbar'
 import { Sidebar } from './components/Sidebar'
@@ -47,13 +48,14 @@ const app = new Elysia()
       }
     },
     path: '/openapi',
-    exclude: {paths: ['/*', '/favicon.ico', '/img/*']}
+    exclude: { paths: ['/*', '/favicon.ico', '/img/*', '/js/*'] }
   }))
   .use(stigmataRoutes)
   .use(weaponRoutes)
   .use(astralOpRoutes)
   .get('/favicon.ico', () => file('public/favicon.ico'))
   .get('/img/*', ({ params }) => file(`public/img/${params['*']}`))
+  .get('/js/*', ({ params }) => file(`public/js/${params['*']}`))
 
 // Layout Information
 const Layout = ({ children }: { children: JSX.Element }) => (
@@ -83,9 +85,10 @@ const Layout = ({ children }: { children: JSX.Element }) => (
 
 // Home Page
 app.get('/', async () => {
-  const [weaponCount, stigmataCount] = await Promise.all([
+  const [weaponCount, stigmataCount, astralOpCount] = await Promise.all([
     db.select({ count: sql<number>`count(*)` }).from(weapon).get(),
     db.select({ count: sql<number>`count(*)` }).from(stigmata).get(),
+    db.select({ count: sql<number>`count(*)` }).from(astralop).get(),
   ])
 
   return (
@@ -128,7 +131,7 @@ app.get('/', async () => {
           </div>
           <div class="w-px bg-slate-600"></div>
           <div class="text-center">
-            <p class="text-2xl font-bold text-slate-200">WIP</p>
+            <p class="text-2xl font-bold text-slate-200">{astralOpCount?.count ?? 0}</p>
             <p class="text-slate-400 text-sm">AstralOps</p>
           </div>
         </div>
@@ -227,7 +230,28 @@ app.get('/stigmata/:id/position/:index', async ({ params }) => {
   const pos = stigma.positions[Number(params.index)];
 
   return (
-    <div>
+    <>
+      {stigma.positions.map((_, i) => (
+        <div id={`icon-${stigma.id}-${i}`} hx-swap-oob="outerHTML">
+          <div
+            data-key={i}
+            class={`relative rounded-full aspect-[3/1] border-2 transition-all duration-200 cursor-pointer
+              ${stigma.positions.length === 1 ? 'col-start-2' : ''}
+              ${i === Number(params.index)
+                ? 'border-violet-400 bg-violet-400/30'
+                : 'border-slate-400 bg-slate-600 hover:scale-105 hover:border-slate-100'
+              }`}
+            id={`icon-${stigma.id}-${i}`}
+            hx-get={`/stigmata/${stigma.id}/position/${i}`}
+            hx-target={`#content-container-${stigma.id}`}
+            hx-swap="innerHTML transition:true">
+            <div class={`text-lg font-bold rounded-full absolute w-full h-full flex items-center justify-center
+              ${i === Number(params.index) ? 'text-violet-300' : 'text-slate-300'}`}>
+              {stigma.positions[i].position}
+            </div>
+          </div>
+        </div>
+      ))}
       {stigma.images && stigma.images.length > 0 && (
         <div class="rounded-none border-2 border-slate-400 overflow-hidden aspect-square mx-4 md:mx-10 flex">
           <img src={stigma.images.find(img => img.position === pos.position)?.imgUrl ?? ''}
@@ -237,11 +261,94 @@ app.get('/stigmata/:id/position/:index', async ({ params }) => {
           />
         </div>
       )}
-    </div>
+    </>
   );
 }, { detail: { hide: true } })
 
-app.get('/astralops', () => <UnderConstruction page="AstralOps" />, { detail: { hide: true } })
+app.get('/astralops', () => (
+  <Layout>
+    <>
+      <div class="flex justify-center m-4">
+        <input
+          type="text"
+          name="search"
+          placeholder="Search AstralOps..."
+          class="max-w-4xl 3xl:max-w-screen-xl w-full p-2 my-2 rounded-md bg-slate-800 text-white"
+          hx-trigger="keyup changed delay:500ms"
+          hx-get="/astralops-list"
+          hx-target="#astralops-list"
+        />
+      </div>
+      <div id="astralops-list" hx-get="/astralops-list" hx-trigger="load"></div>
+    </>
+  </Layout>
+), { detail: { hide: true } })
+
+app.get('/astralops-list', async ({ query }) => {
+  try {
+    const searchTerm = query.search as string || '';
+    const astralOps = await getAstralOp({
+      query: {
+        name: searchTerm ? { $like: `%${searchTerm}%` } : undefined
+      }
+    });
+    return <AstralOpList astralOps={astralOps} />;
+  } catch (error) {
+    console.error('Error fetching astralops:', error);
+    return <div class="text-slate-200">Error fetching AstralOps data</div>;
+  }
+}, { detail: { hide: true } })
+
+app.get('/astralop/:id/skill/:category/:index', async ({ params }) => {
+  const astralOps = await getAstralOp({ query: { id: Number(params.id) } });
+  if (astralOps.length === 0) return 'AstralOp not found';
+
+  const astralOp = astralOps[0];
+  const { synergy, recharge, passive } = astralOp.skills;
+  const categorySkills = astralOp.skills[params.category as keyof typeof astralOp.skills];
+  const skill = categorySkills?.[Number(params.index)];
+
+  if (!skill) return 'Skill not found';
+
+  const categoryMap = [
+    { key: 'synergy', skills: synergy },
+    { key: 'recharge', skills: recharge },
+    { key: 'passive', skills: passive },
+  ]
+
+  return (
+    <>
+      {categoryMap.map(({ key, skills: catSkills }) =>
+        catSkills?.map((_: typeof synergy[0], i: number) => (
+          <div id={`skill-node-${astralOp.id}-${key}-${i}`} hx-swap-oob="outerHTML">
+            <button
+              id={`skill-node-${astralOp.id}-${key}-${i}`}
+              class={`w-8 h-8 rounded-full border-2 flex items-center justify-center text-xs font-bold transition-all duration-200 cursor-pointer
+                ${key === params.category && i === Number(params.index)
+                  ? 'border-violet-400 bg-violet-400/30 text-violet-300'
+                  : 'border-slate-400 bg-slate-600 text-slate-300 hover:scale-105 hover:border-slate-100'
+                }`}
+              hx-get={`/astralop/${astralOp.id}/skill/${key}/${i}`}
+              hx-target={`#skill-content-${astralOp.id}`}
+              hx-swap="innerHTML transition:true"
+            >
+              {i + 1}
+            </button>
+          </div>
+        ))
+      )}
+      <div class="flex items-center gap-2 mb-2">
+        <p class="text-slate-200 font-medium">{skill.skillName}</p>
+        {skill.unlock !== 'S' && (
+          <span class="text-xs font-bold px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-400 border border-amber-500/40">
+            {skill.unlock}
+          </span>
+        )}
+      </div>
+      <p class="text-sm text-slate-400">{skill.skillDescription}</p>
+    </>
+  );
+}, { detail: { hide: true } })
 
 // About Page
 app.get('/about', () => (
