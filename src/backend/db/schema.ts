@@ -1,119 +1,132 @@
-import { sql } from 'drizzle-orm';
-import { integer, sqliteTable, text } from 'drizzle-orm/sqlite-core';
+import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core"
 
 // stigmata schemas start here
-export const stigmata = sqliteTable('stigmata', {
-  id: integer('id').primaryKey({ autoIncrement: true }),
-  name: text('name').notNull(),
-});
+export const stigmata = sqliteTable("stigmata", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  name: text("name").notNull(),
+})
 
-export const stigmataPositions = sqliteTable('stigmata_positions', {
-  id: integer('id').primaryKey({ autoIncrement: true }),
-  stigmataId: integer('stigmata_id').notNull().references(() => stigmata.id),
-  position: text('position').notNull(),
-  name: text('name').notNull(),
-  skillName: text('skill_name'),
-  skillDescription: text('skill_description'),
-});
+export const stigmataPositions = sqliteTable("stigmata_positions", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  stigmataId: integer("stigmata_id")
+    .notNull()
+    .references(() => stigmata.id),
+  position: text("position").notNull(),
+  name: text("name").notNull(),
+  skillName: text("skill_name"),
+  skillDescription: text("skill_description"),
+})
 
-export const stigmataStats = sqliteTable('stigmata_stats', {
-  id: integer('id').primaryKey({ autoIncrement: true }),
-  positionId: integer('position_id').notNull().references(() => stigmataPositions.id),
-  hp: integer('hp'),
-  atk: integer('atk'),
-  def: integer('def'),
-  crt: integer('crt'),
-  sp: integer('sp'),
-});
+export const stigmataStats = sqliteTable("stigmata_stats", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  positionId: integer("position_id")
+    .notNull()
+    .references(() => stigmataPositions.id),
+  hp: integer("hp"),
+  atk: integer("atk"),
+  def: integer("def"),
+  crt: integer("crt"),
+  sp: integer("sp"),
+})
 
-export const stigmataImages = sqliteTable('stigmata_images', {
-  id: integer('id').primaryKey({ autoIncrement: true }),
-  stigmataId: integer('stigmata_id').notNull().references(() => stigmata.id),
-  position: text('position').notNull(),
-  imgUrl: text('img_url'),
-});
+export const stigmataImages = sqliteTable("stigmata_images", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  stigmataId: integer("stigmata_id")
+    .notNull()
+    .references(() => stigmata.id),
+  position: text("position").notNull(),
+  imgUrl: text("img_url"),
+})
 
-export const stigmataSetEffects = sqliteTable('stigmata_set_effects', {
-  id: integer('id').primaryKey({ autoIncrement: true }),
-  stigmataId: integer('stigmata_id').notNull().references(() => stigmata.id),
-  setName: text('set_name'),
-  twoPieceName: text('two_piece_name'),
-  twoPieceEffect: text('two_piece_effect'),
-  threePieceName: text('three_piece_name'),
-  threePieceEffect: text('three_piece_effect'),
-});
+export const stigmataSetEffects = sqliteTable("stigmata_set_effects", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  stigmataId: integer("stigmata_id")
+    .notNull()
+    .references(() => stigmata.id),
+  setName: text("set_name"),
+  twoPieceName: text("two_piece_name"),
+  twoPieceEffect: text("two_piece_effect"),
+  threePieceName: text("three_piece_name"),
+  threePieceEffect: text("three_piece_effect"),
+})
 
-export type InsertStigmata = typeof stigmata.$inferInsert;
+export type InsertStigmata = typeof stigmata.$inferInsert
 export type SelectStigmata = typeof stigmata.$inferSelect & {
   positions: (typeof stigmataPositions.$inferSelect & {
     stats: typeof stigmataStats.$inferSelect
-  })[];
-  images: typeof stigmataImages.$inferSelect[];
-  setEffects: typeof stigmataSetEffects.$inferSelect;
-};
-
+  })[]
+  images: (typeof stigmataImages.$inferSelect)[]
+  setEffects: typeof stigmataSetEffects.$inferSelect
+}
 
 // weapon schemas start here
-export const weapon = sqliteTable('weapon', {
-  id: integer('id').primaryKey({ autoIncrement: true }),
-  name: text('name').notNull(),
-  atk: integer('atk'),
-  crt: integer('crt'),
-});
+export const weapon = sqliteTable("weapon", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  name: text("name").notNull(),
+  atk: integer("atk"),
+  crt: integer("crt"),
+})
 
-export const weaponImages = sqliteTable('weapon_images', {
-  id: integer('id').primaryKey({ autoIncrement: true }),
-  weaponId: integer('weapon_id').notNull().references(() => weapon.id),
-  baseUrl: text('base_url'),
-  maxUrl: text('max_url'),
-});
+export const weaponImages = sqliteTable("weapon_images", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  weaponId: integer("weapon_id")
+    .notNull()
+    .references(() => weapon.id),
+  baseUrl: text("base_url"),
+  maxUrl: text("max_url"),
+})
 
-export const weaponSkills = sqliteTable('weapon_skills', {
-  id: integer('id').primaryKey({ autoIncrement: true }),
-  weaponId: integer('weapon_id').notNull().references(() => weapon.id),
-  skillName: text('skill_name').notNull(),
-  skillDescription: text('skill_description').notNull(),
-});
+export const weaponSkills = sqliteTable("weapon_skills", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  weaponId: integer("weapon_id")
+    .notNull()
+    .references(() => weapon.id),
+  skillName: text("skill_name").notNull(),
+  skillDescription: text("skill_description").notNull(),
+})
 
-export type InsertWeapon = typeof weapon.$inferInsert;
+export type InsertWeapon = typeof weapon.$inferInsert
 export type SelectWeapon = typeof weapon.$inferSelect & {
-  images: typeof weaponImages.$inferSelect[];
-  skills: typeof weaponSkills.$inferSelect[];
-};
-
+  images: (typeof weaponImages.$inferSelect)[]
+  skills: (typeof weaponSkills.$inferSelect)[]
+}
 
 // astralop schemas start here
-export const astralop = sqliteTable('astralop', {
-  id: integer('id').primaryKey({ autoIncrement: true }),
-  name: text('name').notNull(),
-  imgUrl: text('img_url'),
-  damage: text('damage').notNull(),
-});
+export const astralop = sqliteTable("astralop", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  name: text("name").notNull(),
+  imgUrl: text("img_url"),
+  damage: text("damage").notNull(),
+})
 
-export const astralOpSpecializations = sqliteTable('astralop_specializations', {
-  id: integer('id').primaryKey({ autoIncrement: true }),
-  astralOpId: integer('astralop_id').notNull().references(() => astralop.id),
-  spName: text('sp_name').notNull(),
-  spTag: text('sp_tag').notNull(),
-});
+export const astralOpSpecializations = sqliteTable("astralop_specializations", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  astralOpId: integer("astralop_id")
+    .notNull()
+    .references(() => astralop.id),
+  spName: text("sp_name").notNull(),
+  spTag: text("sp_tag").notNull(),
+})
 
-export const astralOpSkills = sqliteTable('astralop_skills', {
-  id: integer('id').primaryKey({ autoIncrement: true }),
-  astralOpId: integer('astralop_id').notNull().references(() => astralop.id),
-  category: text('category').notNull(),
-  skillOrder: integer('skill_order').notNull(),
-  skillName: text('skill_name').notNull(),
-  skillDescription: text('skill_description').notNull(),
-  unlock: text('unlock').notNull(),
-  imgUrl: text('img_url'),
-});
+export const astralOpSkills = sqliteTable("astralop_skills", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  astralOpId: integer("astralop_id")
+    .notNull()
+    .references(() => astralop.id),
+  category: text("category").notNull(),
+  skillOrder: integer("skill_order").notNull(),
+  skillName: text("skill_name").notNull(),
+  skillDescription: text("skill_description").notNull(),
+  unlock: text("unlock").notNull(),
+  imgUrl: text("img_url"),
+})
 
-export type InsertAstralOp = typeof astralop.$inferInsert;
+export type InsertAstralOp = typeof astralop.$inferInsert
 export type SelectAstralOp = typeof astralop.$inferSelect & {
-  specializations: typeof astralOpSpecializations.$inferSelect[];
+  specializations: (typeof astralOpSpecializations.$inferSelect)[]
   skills: {
-    synergy: typeof astralOpSkills.$inferSelect[];
-    recharge: typeof astralOpSkills.$inferSelect[];
-    passive: typeof astralOpSkills.$inferSelect[];
-  };
-};
+    synergy: (typeof astralOpSkills.$inferSelect)[]
+    recharge: (typeof astralOpSkills.$inferSelect)[]
+    passive: (typeof astralOpSkills.$inferSelect)[]
+  }
+}

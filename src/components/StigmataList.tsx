@@ -1,21 +1,27 @@
-import { html, Html } from '@elysiajs/html'
-import { SelectStigmata } from '../backend/db/schema'
-import { Stigma } from './Stigma'
+import { html, Html } from "@elysiajs/html"
+import { SelectStigmata } from "../backend/db/schema"
+import { Stigma } from "./Stigma"
 
-export function StigmataList({ stigmata, hasMore, hasFlags, offset, search }: { 
+export function StigmataList({
+  stigmata,
+  hasMore,
+  hasFlags,
+  offset,
+  search,
+}: {
   stigmata: SelectStigmata[]
   hasMore: boolean
   hasFlags: boolean
   offset: number
   search: string
 }) {
-  const newOffset = offset + stigmata.length;
+  const newOffset = offset + stigmata.length
 
   const loadMoreBtn = hasMore ? (
-    <div id="load-more-btn" class="flex items-center justify-center gap-4 my-4">
-      <span class="text-slate-400 text-sm">Showing first {newOffset} results</span>
+    <div id="load-more-btn" class="my-4 flex items-center justify-center gap-4">
+      <span class="text-sm text-slate-400">Showing first {newOffset} results</span>
       <button
-        class="bg-slate-700 hover:bg-violet-400/60 border border-slate-600 hover:border-violet-400 text-slate-300 hover:text-white text-sm font-medium px-4 py-2 rounded-lg transition-all duration-200"
+        class="rounded-lg border border-slate-600 bg-slate-700 px-4 py-2 text-sm font-medium text-slate-300 transition-all duration-200 hover:border-violet-400 hover:bg-violet-400/60 hover:text-white"
         hx-get="/stigmata-list"
         hx-target="#stigmata-grid"
         hx-swap="beforeend"
@@ -27,10 +33,10 @@ export function StigmataList({ stigmata, hasMore, hasFlags, offset, search }: {
       </button>
     </div>
   ) : (
-    <div id="load-more-btn" class="flex items-center justify-center gap-4 my-4">
-      <span class="text-slate-400 text-sm">Showing all {newOffset} results</span>
+    <div id="load-more-btn" class="my-4 flex items-center justify-center gap-4">
+      <span class="text-sm text-slate-400">Showing all {newOffset} results</span>
     </div>
-  );
+  )
 
   if (offset > 0) {
     // Load more — return raw items only, no wrapper
@@ -44,13 +50,13 @@ export function StigmataList({ stigmata, hasMore, hasFlags, offset, search }: {
           {loadMoreBtn}
         </div>
       </>
-    );
+    )
   }
 
   // Initial load — return full wrapper
   return (
     <>
-      <div id="stigmata-grid" class="grid grid-cols-1 max-w-5xl 3xl:max-w-screen-xl w-full gap-4 my-4 mx-auto">
+      <div id="stigmata-grid" class="3xl:max-w-screen-xl mx-auto my-4 grid w-full max-w-5xl grid-cols-1 gap-4">
         {stigmata.map((stigma) => (
           <Stigma {...stigma} />
         ))}

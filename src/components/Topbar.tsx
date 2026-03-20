@@ -1,16 +1,18 @@
-import { Html } from '@elysiajs/html'
+import { Html } from "@elysiajs/html"
 
 export const TopNavbar = () => (
-  <nav class="bg-slate-800 p-4 fixed top-0 left-0 right-0 z-50">
+  <nav class="fixed left-0 right-0 top-0 z-50 bg-slate-800 p-4">
     <div class="flex items-center justify-between">
       <div class="flex items-center">
-        <button 
-          class="text-slate-200 hover:text-white hover:scale-110 transition-all duration-200 mr-4"
+        <button
+          class="mr-4 text-slate-200 transition-all duration-200 hover:scale-110 hover:text-white"
           onclick="toggleSidebar()"
         >
           ☰
         </button>
-        <a href="/" class="text-white text-xl font-bold hover:text-violet-400 transition-all duration-200">Prometheus DB</a>
+        <a href="/" class="text-xl font-bold text-white transition-all duration-200 hover:text-violet-400">
+          Prometheus DB
+        </a>
       </div>
     </div>
   </nav>

@@ -1,6 +1,5 @@
 {
-  "Single Stigmata Post":
-  {
+  "Single Stigmata Post": {
     "name": "Test Stigma",
     "positions": [
       {
@@ -33,9 +32,7 @@
     }
   },
 
-
-  "All Positions Post":
-  {
+  "All Positions Post": {
     "name": "Test Stigmata",
     "positions": [
       {
