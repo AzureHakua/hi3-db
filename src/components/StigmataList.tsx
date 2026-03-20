@@ -61,7 +61,7 @@ export function StigmataList({
           <Stigma {...stigma} />
         ))}
       </div>
-      {hasFlags && loadMoreBtn}
+      {(hasFlags || search) && loadMoreBtn}
     </>
   )
 }

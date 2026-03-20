@@ -43,6 +43,7 @@ function parseSearchQuery(input: string) {
 
   flags.single = /(-single|-1)\b/.test(input)
   flags.set = /(-set|-3)\b/.test(input)
+  input = input.replace(/\s*(-single|-1|-set|-3)\s*/g, "").trim()
 
   const effectMatch = input.match(/-effect\s+"([^"]+)"|-effect\s+(\S+)/)
   if (effectMatch) {
@@ -100,7 +101,8 @@ export const getStigmata = async ({ query }: { query: any }) => {
 
   const searchTerm = query.name?.$like?.replace(/%/g, "") || query.name?.replace(/\+/g, " ") || ""
   const flags = parseSearchQuery(searchTerm)
-  const fetchAll = !!flags.name
+  console.log("flags:", flags)
+  const fetchAll = !!flags.name || !!flags.effect || flags.single || flags.set
   const useLoadMore = !fetchAll
   const fetchLimit = fetchAll ? 999 : limit + 1
 
