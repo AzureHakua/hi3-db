@@ -36,6 +36,7 @@ function parseSearchQuery(input: string) {
   const flags = {
     name: "",
     effect: "",
+    position: "",
     id: null as number | null,
     single: false,
     set: false,
@@ -44,6 +45,12 @@ function parseSearchQuery(input: string) {
   flags.single = /(-single|-1)\b/.test(input)
   flags.set = /(-set|-3)\b/.test(input)
   input = input.replace(/\s*(-single|-1|-set|-3)\s*/g, "").trim()
+
+  const posMatch = input.match(/-(t|m|b)\b/i)
+  if (posMatch) {
+    flags.position = posMatch[1].toUpperCase()
+    input = input.replace(posMatch[0], "").trim()
+  }
 
   const effectMatch = input.match(/-effect\s+"([^"]+)"|-effect\s+(\S+)/)
   if (effectMatch) {
@@ -68,12 +75,13 @@ function parseSearchQuery(input: string) {
  * @flags
  * -single | -1    Filter to stigmata with only one position
  * -set    | -3    Filter to stigmata with all three positions (T/M/B)
+ * -t/m/b          Filter stigmata that have the position (T/M/B)
  * -effect "term"  Filter by skill or set effect description
- * -id <number>    Filter by stigmata ID
+ * -id <number>    Filter by stigmata ID, note that these not game IDS but internal database IDs
  *
  * @example
- * "mei -effect "physical" -set"  // 3-piece stigmata with physical in effect
- * "newton"                       // paginated results for newton
+ * "-effect "physical" -set"      // 3-piece stigmata with physical in effect
+ * "kiana -effect fire -single"   // single pieces with kiana in name and fire in effect
  * "-single"                      // all single-position stigmata
  *
  * @param {Object} params.query - The query parameters.
@@ -131,15 +139,24 @@ export const getStigmata = async ({ query }: { query: any }) => {
   // Post-filter
   if (flags.single) fullData = fullData.filter((s) => s.positions.length === 1)
   if (flags.set) fullData = fullData.filter((s) => s.positions.length === 3)
+  // Filter by position if specified
+  if (flags.position) {
+    fullData = fullData.filter((s) =>
+      s.positions.some((p: typeof stigmataPositions.$inferSelect) => p.position === flags.position),
+    )
+  }
+
+  // Filter by effect if specified
   if (flags.effect) {
     const term = flags.effect.toLowerCase()
     fullData = fullData.filter(
       (s) =>
-        s.positions.some((p: typeof stigmataPositions.$inferSelect) =>
-          p.skillDescription?.toLowerCase().includes(term),
-        ) ||
-        s.setEffects?.twoPieceEffect?.toLowerCase().includes(term) ||
-        s.setEffects?.threePieceEffect?.toLowerCase().includes(term),
+        s.positions
+          .filter((p: typeof stigmataPositions.$inferSelect) => (flags.position ? p.position === flags.position : true))
+          .some((p: typeof stigmataPositions.$inferSelect) => p.skillDescription?.toLowerCase().includes(term)) ||
+        (!flags.position &&
+          (s.setEffects?.twoPieceEffect?.toLowerCase().includes(term) ||
+            s.setEffects?.threePieceEffect?.toLowerCase().includes(term))),
     )
   }
 
