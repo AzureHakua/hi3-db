@@ -79,7 +79,7 @@ export const aboutPage = () => (
         </div>
 
         <div class="rounded-xl bg-slate-700 p-6">
-          <h2 class="mb-3 text-xl font-semibold">Tech Stack</h2>
+          <h2 class="mb-3 text-xl font-semibold">Powered By</h2>
           <div class="grid grid-cols-2 gap-3">
             {[
               {
