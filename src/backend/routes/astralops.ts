@@ -274,7 +274,7 @@ const astralOpBody = t.Object({
 /**
  * Defines the routes for astralop operations.
  */
-export const astralOpRoutes = new Elysia({ prefix: "/api" })
+export const astralOpRoutes = new Elysia({ prefix: "/api", detail: { hide: false } })
   /**
    * GET /api/astralop
    * Retrieves astralop based on query parameters.

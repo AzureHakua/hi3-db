@@ -505,7 +505,7 @@ const stigmataBody = t.Object({
 /**
  * Defines the routes for stigmata operations.
  */
-export const stigmataRoutes = new Elysia({ prefix: "/api" })
+export const stigmataRoutes = new Elysia({ prefix: "/api", detail: { hide: false } })
   /**
    * GET /api/stigmata
    * Retrieves stigmata based on query parameters.

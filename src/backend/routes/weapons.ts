@@ -231,7 +231,7 @@ const weaponBody = t.Object({
 /**
  * Defines the routes for weapon operations.
  */
-export const weaponRoutes = new Elysia({ prefix: "/api" })
+export const weaponRoutes = new Elysia({ prefix: "/api", detail: { hide: false } })
   /**
    * GET /api/weapon
    * Retrieves weapon based on query parameters.

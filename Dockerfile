@@ -2,32 +2,24 @@ FROM oven/bun AS builder
 
 WORKDIR /app
 
-COPY package.json bun.lockb ./
+COPY package.json bun.lock ./
 
-RUN bun install --production
+RUN bun install
 
 COPY . .
 
+ENV NODE_ENV=production
+
 RUN bun run build
 
-FROM oven/bun
+FROM gcr.io/distroless/base
 
 WORKDIR /app
 
-# Copy the built server
-COPY --from=builder /app/server ./server
-
-# Copy node_modules from the builder stage
-COPY --from=builder /app/node_modules ./node_modules
-
-# Copy the src directory (including styles)
-COPY --from=builder /app/src ./src
-
-# Copy the public directory (including images)
+COPY --from=builder /app/server server
 COPY --from=builder /app/public ./public
 
-# Copy all configuration files
-COPY --from=builder /app/*.json /app/*.js /app/*.ts /app/*.tsx ./
+ENV NODE_ENV=production
 
 EXPOSE 3000
 

@@ -13,7 +13,13 @@ import { stigmataPage, stigmataListPage, stigmataPositionPage } from "./pages/St
 import { astralOpsPage, astralOpsListPage, astralOpSkillPage } from "./pages/AstralOps"
 import { aboutPage } from "./pages/About"
 
-const app = new Elysia()
+const app = new Elysia({
+  normalize: true,
+  sanitize: (value) => Bun.escapeHTML(value),
+  detail: { hide: true },
+  nativeStaticResponse: true,
+  serve: { idleTimeout: 30 },
+})
   .use(html())
   .use(cors())
   .use(
@@ -43,29 +49,25 @@ const app = new Elysia()
   .get("/favicon.ico", () => file("public/favicon.ico"))
   .get("/img/*", ({ params }) => file(`public/img/${params["*"]}`))
   .get("/js/*", ({ params }) => file(`public/js/${params["*"]}`))
-  .get("/", homePage, { detail: { hide: true } })
-  .get("/valkyries", valkyriesPage, { detail: { hide: true } })
-  .get("/weapons", weaponsPage, { detail: { hide: true } })
+  .get("/", homePage)
+  .get("/valkyries", valkyriesPage)
+  .get("/weapons", weaponsPage)
   .get("/weapon-list", weaponsListPage, {
     query: t.Object({ search: t.Optional(t.String()) }),
-    detail: { hide: true },
   })
-  .get("/stigmata", stigmataPage, { detail: { hide: true } })
+  .get("/stigmata", stigmataPage)
   .get("/stigmata-list", stigmataListPage, {
     query: t.Object({
       search: t.Optional(t.String()),
       offset: t.Optional(t.String()),
     }),
-    detail: { hide: true },
   })
   .get("/stigmata/:id/position/:index", stigmataPositionPage, {
     params: t.Object({ id: t.Numeric(), index: t.Numeric() }),
-    detail: { hide: true },
   })
-  .get("/astralops", astralOpsPage, { detail: { hide: true } })
+  .get("/astralops", astralOpsPage)
   .get("/astralops-list", astralOpsListPage, {
     query: t.Object({ search: t.Optional(t.String()) }),
-    detail: { hide: true },
   })
   .get("/astralop/:id/skill/:category/:index", astralOpSkillPage, {
     params: t.Object({
@@ -73,9 +75,8 @@ const app = new Elysia()
       category: t.String(),
       index: t.Numeric(),
     }),
-    detail: { hide: true },
   })
-  .get("/about", aboutPage, { detail: { hide: true } })
+  .get("/about", aboutPage)
   .listen(3000)
 
 const { hostname, port } = app.server!
