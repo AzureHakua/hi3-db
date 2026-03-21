@@ -3,7 +3,6 @@ import { html } from "@elysiajs/html"
 import { cors } from "@elysiajs/cors"
 import { tailwind } from "@gtramontina.com/elysia-tailwind"
 import { openapi } from "@elysiajs/openapi"
-import { staticPlugin } from "@elysiajs/static"
 import "./styles/tailwind.css"
 
 import { stigmataRoutes, weaponRoutes, astralOpRoutes } from "./backend/routes"
@@ -25,7 +24,6 @@ const app = new Elysia()
       options: { minify: true, map: true, autoprefixer: false },
     }),
   )
-  .use(staticPlugin({ prefix: "/" }))
   .use(
     openapi({
       documentation: {

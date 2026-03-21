@@ -76,12 +76,12 @@ src/
 │   └── Topbar.tsx            # Top navigation
 ├── pages/
 │   ├── Home.tsx
+│   ├── Valkyries.tsx
 │   ├── Weapons.tsx
 │   ├── Stigmata.tsx
 │   ├── AstralOps.tsx
-│   ├── Valkyries.tsx
 │   └── About.tsx
-├── layout.tsx                # Layout + UnderConstruction
+├── layout.tsx
 ├── styles/
 │   └── tailwind.css
 └── index.tsx                 # App entry + route registration
