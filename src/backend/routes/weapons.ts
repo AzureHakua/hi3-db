@@ -205,6 +205,29 @@ export const deleteWeapon = async ({ params }: { params: { id: number } }) => {
   return { success: true }
 }
 
+// Define weapon body
+const weaponBody = t.Object({
+  name: t.String(),
+  atk: t.Optional(t.Number()),
+  crt: t.Optional(t.Number()),
+  images: t.Optional(
+    t.Array(
+      t.Object({
+        baseUrl: t.Nullable(t.String()),
+        maxUrl: t.Nullable(t.String()),
+      }),
+    ),
+  ),
+  skills: t.Optional(
+    t.Array(
+      t.Object({
+        skillName: t.String(),
+        skillDescription: t.String(),
+      }),
+    ),
+  ),
+})
+
 /**
  * Defines the routes for weapon operations.
  */
@@ -234,55 +257,8 @@ export const weaponRoutes = new Elysia({ prefix: "/api" })
       return postWeapon({ body })
     },
     {
-      body: t.Union([
-        t.Object({
-          name: t.String(),
-          atk: t.Optional(t.Number()),
-          crt: t.Optional(t.Number()),
-          images: t.Optional(
-            t.Array(
-              t.Object({
-                baseUrl: t.Optional(t.String()),
-                maxUrl: t.Optional(t.String()),
-              }),
-            ),
-          ),
-          skills: t.Optional(
-            t.Array(
-              t.Object({
-                skillName: t.String(),
-                skillDescription: t.String(),
-              }),
-            ),
-          ),
-        }),
-        t.Array(
-          t.Object({
-            name: t.String(),
-            atk: t.Optional(t.Number()),
-            crt: t.Optional(t.Number()),
-            images: t.Optional(
-              t.Array(
-                t.Object({
-                  baseUrl: t.Optional(t.String()),
-                  maxUrl: t.Optional(t.String()),
-                }),
-              ),
-            ),
-            skills: t.Optional(
-              t.Array(
-                t.Object({
-                  skillName: t.String(),
-                  skillDescription: t.String(),
-                }),
-              ),
-            ),
-          }),
-        ),
-      ]),
-      headers: t.Object({
-        authorization: t.String(),
-      }),
+      body: t.Union([weaponBody, t.Array(weaponBody)]),
+      headers: t.Object({ authorization: t.String() }),
     },
   )
   /**
@@ -299,30 +275,26 @@ export const weaponRoutes = new Elysia({ prefix: "/api" })
       params: t.Object({
         id: t.Numeric(),
       }),
-      body: t.Object({
-        name: t.Optional(t.String()),
-        atk: t.Optional(t.Number()),
-        crt: t.Optional(t.Number()),
-        images: t.Optional(
-          t.Array(
+      body: t.Partial(
+        t.Object({
+          name: t.String(),
+          atk: t.Number(),
+          crt: t.Number(),
+          images: t.Array(
             t.Object({
-              baseUrl: t.Optional(t.String()),
-              maxUrl: t.Optional(t.String()),
+              baseUrl: t.Nullable(t.String()),
+              maxUrl: t.Nullable(t.String()),
             }),
           ),
-        ),
-        skills: t.Optional(
-          t.Array(
+          skills: t.Array(
             t.Object({
-              skillName: t.Optional(t.String()),
-              skillDescription: t.Optional(t.String()),
+              skillName: t.String(),
+              skillDescription: t.String(),
             }),
           ),
-        ),
-      }),
-      headers: t.Object({
-        authorization: t.String(),
-      }),
+        }),
+      ),
+      headers: t.Object({ authorization: t.String() }),
     },
   )
   /**
@@ -336,12 +308,8 @@ export const weaponRoutes = new Elysia({ prefix: "/api" })
       return deleteWeapon({ params })
     },
     {
-      params: t.Object({
-        id: t.Numeric(),
-      }),
-      headers: t.Object({
-        authorization: t.String(),
-      }),
+      params: t.Object({ id: t.Numeric() }),
+      headers: t.Object({ authorization: t.String() }),
     },
   )
 

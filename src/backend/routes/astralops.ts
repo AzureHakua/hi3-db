@@ -222,8 +222,8 @@ export const patchAstralOp = async ({ params, body }: { params: { id: number }; 
 }
 
 /**
- * Deletes a stigmata entry.
- * @param {Object} params.id - The ID of the stigmata to delete.
+ * Deletes an astralop entry.
+ * @param {Object} params.id - The ID of the astralop to delete.
  * @returns {Object} The success message.
  */
 export const deleteAstralOp = async ({ params }: { params: { id: number } }) => {
@@ -241,13 +241,43 @@ export const deleteAstralOp = async ({ params }: { params: { id: number } }) => 
   return { success: true }
 }
 
+// Define skill body shape
+const skillBody = t.Object({
+  skillName: t.String(),
+  skillDescription: t.String(),
+  unlock: t.UnionEnum(["S", "SS", "SSS"]),
+  imgUrl: t.Optional(t.String()),
+})
+
+// Define astralop shape
+const astralOpBody = t.Object({
+  name: t.String(),
+  imgUrl: t.Optional(t.String()),
+  damage: t.String(),
+  specializations: t.Optional(
+    t.Array(
+      t.Object({
+        spName: t.String(),
+        spTag: t.String(),
+      }),
+    ),
+  ),
+  skills: t.Optional(
+    t.Object({
+      synergy: t.Optional(t.Array(skillBody)),
+      recharge: t.Optional(t.Array(skillBody)),
+      passive: t.Optional(t.Array(skillBody)),
+    }),
+  ),
+})
+
 /**
  * Defines the routes for astralop operations.
  */
 export const astralOpRoutes = new Elysia({ prefix: "/api" })
   /**
    * GET /api/astralop
-   * Retrieves stigmata based on query parameters.
+   * Retrieves astralop based on query parameters.
    */
   .get("/astralop", getAstralOp, {
     query: t.Object({
@@ -258,7 +288,7 @@ export const astralOpRoutes = new Elysia({ prefix: "/api" })
   })
   /**
    * POST /api/astralop
-   * Creates a new stigmata entry. Requires authentication.
+   * Creates a new astralop entry. Requires authentication.
    */
   .post(
     "/astralop",
@@ -270,56 +300,8 @@ export const astralOpRoutes = new Elysia({ prefix: "/api" })
       return postAstralOp({ body })
     },
     {
-      body: t.Object({
-        name: t.String(),
-        imgUrl: t.Optional(t.String()),
-        damage: t.String(),
-        specializations: t.Optional(
-          t.Array(
-            t.Object({
-              spName: t.String(),
-              spTag: t.String(),
-            }),
-          ),
-        ),
-        skills: t.Optional(
-          t.Object({
-            synergy: t.Optional(
-              t.Array(
-                t.Object({
-                  skillName: t.String(),
-                  skillDescription: t.String(),
-                  unlock: t.String(),
-                  imgUrl: t.Optional(t.String()),
-                }),
-              ),
-            ),
-            recharge: t.Optional(
-              t.Array(
-                t.Object({
-                  skillName: t.String(),
-                  skillDescription: t.String(),
-                  unlock: t.String(),
-                  imgUrl: t.Optional(t.String()),
-                }),
-              ),
-            ),
-            passive: t.Optional(
-              t.Array(
-                t.Object({
-                  skillName: t.String(),
-                  skillDescription: t.String(),
-                  unlock: t.String(),
-                  imgUrl: t.Optional(t.String()),
-                }),
-              ),
-            ),
-          }),
-        ),
-      }),
-      headers: t.Object({
-        authorization: t.String(),
-      }),
+      body: t.Union([astralOpBody, t.Array(astralOpBody)]),
+      headers: t.Object({ authorization: t.String() }),
     },
   )
   /**
@@ -336,28 +318,23 @@ export const astralOpRoutes = new Elysia({ prefix: "/api" })
       params: t.Object({
         id: t.Numeric(),
       }),
-      body: t.Object({
-        name: t.Optional(t.String()),
-        imgUrl: t.Optional(t.String()),
-        damage: t.Optional(t.String()),
-        specializations: t.Optional(
-          t.Array(
+      body: t.Partial(
+        t.Object({
+          name: t.String(),
+          imgUrl: t.String(),
+          damage: t.String(),
+          specializations: t.Array(
             t.Object({
               spName: t.String(),
               spTag: t.String(),
             }),
           ),
-        ),
-        skills: t.Optional(
-          t.Object({
+          skills: t.Object({
             synergy: t.Optional(
               t.Array(
                 t.Object({
-                  skillOrder: t.Number(),
-                  skillName: t.Optional(t.String()),
-                  skillDescription: t.Optional(t.String()),
-                  unlock: t.Optional(t.String()),
-                  imgUrl: t.Optional(t.String()),
+                  skillOrder: t.Number(), // required - identifier
+                  ...t.Partial(skillBody).properties,
                 }),
               ),
             ),
@@ -365,10 +342,7 @@ export const astralOpRoutes = new Elysia({ prefix: "/api" })
               t.Array(
                 t.Object({
                   skillOrder: t.Number(),
-                  skillName: t.Optional(t.String()),
-                  skillDescription: t.Optional(t.String()),
-                  unlock: t.Optional(t.String()),
-                  imgUrl: t.Optional(t.String()),
+                  ...t.Partial(skillBody).properties,
                 }),
               ),
             ),
@@ -376,24 +350,19 @@ export const astralOpRoutes = new Elysia({ prefix: "/api" })
               t.Array(
                 t.Object({
                   skillOrder: t.Number(),
-                  skillName: t.Optional(t.String()),
-                  skillDescription: t.Optional(t.String()),
-                  unlock: t.Optional(t.String()),
-                  imgUrl: t.Optional(t.String()),
+                  ...t.Partial(skillBody).properties,
                 }),
               ),
             ),
           }),
-        ),
-      }),
-      headers: t.Object({
-        authorization: t.String(),
-      }),
+        }),
+      ),
+      headers: t.Object({ authorization: t.String() }),
     },
   )
   /**
-   * DELETE /api/stigmata/:id
-   * Deletes a stigmata entry. Requires authentication.
+   * DELETE /api/astralop/:id
+   * Deletes an astralop entry. Requires authentication.
    */
   .delete(
     "/astralop/:id",
@@ -402,12 +371,8 @@ export const astralOpRoutes = new Elysia({ prefix: "/api" })
       return deleteAstralOp({ params })
     },
     {
-      params: t.Object({
-        id: t.Numeric(),
-      }),
-      headers: t.Object({
-        authorization: t.String(),
-      }),
+      params: t.Object({ id: t.Numeric() }),
+      headers: t.Object({ authorization: t.String() }),
     },
   )
 

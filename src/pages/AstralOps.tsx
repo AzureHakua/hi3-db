@@ -1,5 +1,6 @@
 import { Html } from "@elysiajs/html"
 import { Layout } from "../layout"
+import { SearchBar } from "../components/SearchBar"
 import { AstralOpList } from "../components"
 import { getAstralOp } from "../backend/routes"
 
@@ -7,18 +8,14 @@ export const astralOpsPage = () => (
   <Layout>
     <>
       <h1 class="mb-2 text-center text-3xl font-bold">AstralOps</h1>
-      <div class="m-4 flex justify-center">
-        <input
-          type="text"
-          name="search"
-          placeholder="Search AstralOps..."
-          class="3xl:max-w-screen-xl my-2 w-full max-w-4xl rounded-md bg-slate-800 p-2 text-white"
-          hx-trigger="keyup changed delay:500ms"
-          hx-get="/astralops-list"
-          hx-target="#astralops-list"
-        />
-      </div>
-      <div id="astralops-list" hx-get="/astralops-list" hx-trigger="load"></div>
+      <SearchBar placeholder="Search AstralOps..." target="astralops-list" endpoint="/astralops-list" />
+      <div
+        id="astralops-list"
+        hx-get="/astralops-list"
+        hx-trigger="load"
+        hx-target="#astralops-list"
+        hx-swap="innerHTML transition:true"
+      ></div>
     </>
   </Layout>
 )

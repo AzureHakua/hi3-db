@@ -1,5 +1,6 @@
 import { Html } from "@elysiajs/html"
 import { Layout } from "../layout"
+import { SearchBar } from "../components/SearchBar"
 import { StigmataList } from "../components"
 import { getStigmata } from "../backend/routes"
 import { stigmataPositions, stigmataImages } from "../backend/db/schema"
@@ -8,29 +9,7 @@ export const stigmataPage = () => (
   <Layout>
     <>
       <h1 class="mb-2 text-center text-3xl font-bold">Stigmata</h1>
-      <div class="m-4 flex justify-center">
-        <div class="3xl:max-w-screen-xl relative w-full max-w-4xl">
-          <input
-            type="text"
-            id="search-input"
-            name="search"
-            placeholder="Search stigmata..."
-            class="my-2 w-full rounded-md bg-slate-800 p-2 text-white"
-            hx-trigger="keyup changed delay:500ms"
-            hx-get="/stigmata-list"
-            hx-target="#stigmata-list"
-            hx-swap="innerHTML transition:true"
-            hx-indicator="#search-indicator"
-            hx-on--before-request="document.getElementById('stigmata-list').innerHTML=''"
-          />
-          <span
-            id="search-indicator"
-            class="htmx-indicator searching-pulse absolute right-3 top-1/2 -translate-y-1/2 text-sm text-slate-400"
-          >
-            Searching...
-          </span>
-        </div>
-      </div>
+      <SearchBar placeholder="Search stigmata..." target="stigmata-list" endpoint="/stigmata-list" />
       <div
         id="stigmata-list"
         hx-get="/stigmata-list"

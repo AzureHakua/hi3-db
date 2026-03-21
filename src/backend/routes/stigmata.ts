@@ -463,6 +463,45 @@ export const deleteStigmata = async ({ params }: { params: { id: number } }) => 
   return { success: true }
 }
 
+// Define stigmata body
+const stigmataBody = t.Object({
+  name: t.String(),
+  positions: t.Optional(
+    t.Array(
+      t.Object({
+        position: t.UnionEnum(["T", "M", "B"]),
+        name: t.String(),
+        skillName: t.String(),
+        skillDescription: t.String(),
+        stats: t.Object({
+          hp: t.Nullable(t.Number()),
+          atk: t.Nullable(t.Number()),
+          def: t.Nullable(t.Number()),
+          crt: t.Nullable(t.Number()),
+          sp: t.Nullable(t.Number()),
+        }),
+      }),
+    ),
+  ),
+  images: t.Array(
+    t.Object({
+      position: t.UnionEnum(["T", "M", "B"]),
+      imgUrl: t.String(),
+    }),
+  ),
+  setEffects: t.Optional(
+    t.Partial(
+      t.Object({
+        setName: t.String(),
+        twoPieceName: t.String(),
+        twoPieceEffect: t.String(),
+        threePieceName: t.String(),
+        threePieceEffect: t.String(),
+      }),
+    ),
+  ),
+})
+
 /**
  * Defines the routes for stigmata operations.
  */
@@ -474,7 +513,11 @@ export const stigmataRoutes = new Elysia({ prefix: "/api" })
   .get("/stigmata", getStigmata, {
     query: t.Object({
       id: t.Optional(t.Numeric()),
-      name: t.Optional(t.String()),
+      name: t.Optional(
+        t.String({
+          description: "Search term, supports flags: -single/-1, -set/-3, -t/-m/-b, -effect, -id",
+        }),
+      ),
       limit: t.Optional(t.Numeric()),
       offset: t.Optional(t.Numeric()),
     }),
@@ -493,48 +536,8 @@ export const stigmataRoutes = new Elysia({ prefix: "/api" })
       return postStigmata({ body })
     },
     {
-      body: t.Union([
-        t.Array(
-          t.Object({
-            name: t.String(),
-            positions: t.Optional(
-              t.Array(
-                t.Object({
-                  position: t.String(),
-                  name: t.String(),
-                  skillName: t.String(),
-                  skillDescription: t.String(),
-                  stats: t.Object({
-                    hp: t.Optional(t.Number()),
-                    atk: t.Optional(t.Number()),
-                    def: t.Optional(t.Number()),
-                    crt: t.Optional(t.Number()),
-                    sp: t.Optional(t.Number()),
-                  }),
-                }),
-              ),
-            ),
-            images: t.Array(
-              t.Object({
-                position: t.String(),
-                imgUrl: t.String(),
-              }),
-            ),
-            setEffects: t.Optional(
-              t.Object({
-                setName: t.Optional(t.String()),
-                twoPieceName: t.Optional(t.String()),
-                twoPieceEffect: t.Optional(t.String()),
-                threePieceName: t.Optional(t.String()),
-                threePieceEffect: t.Optional(t.String()),
-              }),
-            ),
-          }),
-        ),
-      ]),
-      headers: t.Object({
-        authorization: t.String(),
-      }),
+      body: t.Union([stigmataBody, t.Array(stigmataBody)]),
+      headers: t.Object({ authorization: t.String() }),
     },
   )
   /**
@@ -551,48 +554,48 @@ export const stigmataRoutes = new Elysia({ prefix: "/api" })
       params: t.Object({
         id: t.Numeric(),
       }),
-      body: t.Object({
-        name: t.Optional(t.String()),
-        positions: t.Optional(
-          t.Array(
+      body: t.Partial(
+        t.Object({
+          name: t.String(),
+          positions: t.Array(
             t.Object({
-              position: t.String(), // Required - tells us which position to update
-              name: t.Optional(t.String()), // optional for partial updates
-              skillName: t.Optional(t.String()),
-              skillDescription: t.Optional(t.String()),
-              stats: t.Optional(
+              position: t.UnionEnum(["T", "M", "B"]), // Required - tells us which position to update
+              ...t.Partial(
                 t.Object({
-                  hp: t.Optional(t.Number()),
-                  atk: t.Optional(t.Number()),
-                  def: t.Optional(t.Number()),
-                  crt: t.Optional(t.Number()),
-                  sp: t.Optional(t.Number()),
+                  name: t.String(),
+                  skillName: t.String(),
+                  skillDescription: t.String(),
+                  stats: t.Partial(
+                    t.Object({
+                      hp: t.Number(),
+                      atk: t.Number(),
+                      def: t.Number(),
+                      crt: t.Number(),
+                      sp: t.Number(),
+                    }),
+                  ),
                 }),
-              ),
+              ).properties,
             }),
           ),
-        ),
-        images: t.Optional(
-          t.Array(
+          images: t.Array(
             t.Object({
-              position: t.String(), // Required - tells us which position's image to update
-              imgUrl: t.Optional(t.String()), // Optional - only update if provided
+              position: t.UnionEnum(["T", "M", "B"]), // Required
+              imgUrl: t.String(),
             }),
           ),
-        ),
-        setEffects: t.Optional(
-          t.Object({
-            setName: t.Optional(t.String()),
-            twoPieceName: t.Optional(t.String()),
-            twoPieceEffect: t.Optional(t.String()),
-            threePieceName: t.Optional(t.String()),
-            threePieceEffect: t.Optional(t.String()),
-          }),
-        ),
-      }),
-      headers: t.Object({
-        authorization: t.String(),
-      }),
+          setEffects: t.Partial(
+            t.Object({
+              setName: t.String(),
+              twoPieceName: t.String(),
+              twoPieceEffect: t.String(),
+              threePieceName: t.String(),
+              threePieceEffect: t.String(),
+            }),
+          ),
+        }),
+      ),
+      headers: t.Object({ authorization: t.String() }),
     },
   )
   /**
@@ -606,12 +609,8 @@ export const stigmataRoutes = new Elysia({ prefix: "/api" })
       return deleteStigmata({ params })
     },
     {
-      params: t.Object({
-        id: t.Numeric(),
-      }),
-      headers: t.Object({
-        authorization: t.String(),
-      }),
+      params: t.Object({ id: t.Numeric() }),
+      headers: t.Object({ authorization: t.String() }),
     },
   )
 
