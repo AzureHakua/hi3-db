@@ -11,7 +11,7 @@ WORKDIR /app
 COPY --from=builder /app/server server
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/public ./public
-COPY --from=builder /app/src/styles ./src/styles
+COPY --from=builder /app/src ./src
 COPY --from=builder /app/tailwind.config.js ./tailwind.config.js
 ENV NODE_ENV=production
 CMD ["./server"]
