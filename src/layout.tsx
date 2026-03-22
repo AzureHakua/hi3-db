@@ -14,38 +14,58 @@ export const Layout = ({ children }: { children: JSX.Element }) => (
       <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     </head>
     <body class="bg-slate-900 text-slate-300">
-      <div class="fixed left-0 right-0 top-0 z-50 h-16 -translate-y-full bg-slate-800"></div>
       <TopNavbar />
 
+      {/* Fills gap above navbar when mobile browser chrome resizes */}
+      <div class="fixed left-0 right-0 top-0 z-50 h-4 -translate-y-full bg-slate-800"></div>
+
+      {/* Overlay: closes sidebar on outside click */}
       <div id="sidebar-overlay" class="fixed inset-0 z-40 hidden bg-transparent" onclick="toggleSidebar()"></div>
 
       <div
         id="sidebar-wrapper"
-        class="fixed left-0 top-0 z-50 h-screen w-0 overflow-hidden transition-all duration-300 ease-in-out md:w-64"
+        class="fixed left-0 top-0 z-50 h-screen w-0 overflow-hidden transition-all duration-300 ease-in-out"
       >
         <Sidebar />
       </div>
+
       <script>{`
         const sidebar = document.getElementById('sidebar-wrapper');
         const overlay = document.getElementById('sidebar-overlay');
         const mq = window.matchMedia('(min-width: 1500px)');
-        
+
         function toggleSidebar() {
-          const isOpen = sidebar.style.width === '12rem';
-          sidebar.style.width = isOpen ? '0' : '12rem';
+          const isOpen = sidebar.style.width === '10rem';
+          sidebar.style.width = isOpen ? '0' : '10rem';
           overlay.classList.toggle('hidden', isOpen);
         }
 
         function updateSidebar(e) {
-          sidebar.style.width = e.matches ? '12rem' : '0';
+          sidebar.style.width = e.matches ? '10rem' : '0';
           overlay.classList.add('hidden');
         }
-        
+
         mq.addEventListener('change', updateSidebar);
         updateSidebar(mq);
+
+        function switchTab(groupId, activeIndex) {
+          document.querySelectorAll('[data-panel="' + groupId + '"]').forEach(function(el, i) {
+            if (i === activeIndex) {
+              el.classList.remove('opacity-0', 'pointer-events-none');
+            } else {
+              el.classList.add('opacity-0', 'pointer-events-none');
+            }
+          });
+
+          document.querySelectorAll('[data-tab="' + groupId + '"]').forEach(function(el, i) {
+            const cls = i === activeIndex ? el.dataset.activeClass : el.dataset.inactiveClass;
+            if (cls) el.className = cls;
+          });
+        }
       `}</script>
+
       <div class="w-full flex-1">
-        <main class="mx-auto w-full px-4 pb-8 pt-20 sm:px-6 md:px-10 lg:px-20">{children}</main>
+        <main class="mx-auto w-full px-2 pb-8 pt-20 sm:px-6 md:px-10 lg:px-20">{children}</main>
       </div>
     </body>
   </html>
