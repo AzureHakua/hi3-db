@@ -208,15 +208,17 @@ export const deleteWeapon = async ({ params }: { params: { id: number } }) => {
 // Define weapon body
 const weaponBody = t.Object({
   name: t.String(),
-  atk: t.Optional(t.Number()),
-  crt: t.Optional(t.Number()),
-  images: t.Optional(
-    t.Array(
-      t.Object({
-        baseUrl: t.Nullable(t.String()),
-        maxUrl: t.Nullable(t.String()),
+  atk: t.Number(),
+  crt: t.Number(),
+  images: t.Array(
+    t.Object({
+      baseUrl: t.String({
+        description: "Base form of the weapon",
       }),
-    ),
+      maxUrl: t.String({
+        description: "Max form of the weapon",
+      }),
+    }),
   ),
   skills: t.Optional(
     t.Array(
@@ -228,25 +230,30 @@ const weaponBody = t.Object({
   ),
 })
 
-/**
- * Defines the routes for weapon operations.
- */
-export const weaponRoutes = new Elysia({ prefix: "/api", detail: { hide: false } })
-  /**
-   * GET /api/weapon
-   * Retrieves weapon based on query parameters.
-   */
+export const weaponRoutes = new Elysia({
+  prefix: "/api",
+  detail: { hide: false },
+  tags: ["Weapons"],
+})
   .get("/weapon", getWeapon, {
     query: t.Object({
       id: t.Optional(t.Numeric()),
-      name: t.Optional(t.String()),
-      limit: t.Optional(t.Numeric()),
+      name: t.Optional(
+        t.String({
+          description: "Search term",
+        }),
+      ),
+      limit: t.Optional(
+        t.Numeric({
+          description: "Limits the number of search results, default: 999",
+        }),
+      ),
     }),
+    detail: {
+      summary: "Get weapon",
+      description: "Retrieve weapons by search term",
+    },
   })
-  /**
-   * POST /api/weapon
-   * Creates a new weapon entry. Requires authentication.
-   */
   .post(
     "/weapon",
     ({ body, headers }) => {
@@ -259,12 +266,13 @@ export const weaponRoutes = new Elysia({ prefix: "/api", detail: { hide: false }
     {
       body: t.Union([weaponBody, t.Array(weaponBody)]),
       headers: t.Object({ authorization: t.String() }),
+      detail: {
+        summary: "Create weapon",
+        description: "Create one or multiple weapon entries",
+        security: [{ bearerAuth: [] }],
+      },
     },
   )
-  /**
-   * PATCH /api/weapon/:id
-   * Updates an existing weapon entry. Requires authentication.
-   */
   .patch(
     "/weapon/:id",
     ({ params, body, headers }) => {
@@ -295,12 +303,13 @@ export const weaponRoutes = new Elysia({ prefix: "/api", detail: { hide: false }
         }),
       ),
       headers: t.Object({ authorization: t.String() }),
+      detail: {
+        summary: "Patch weapon",
+        description: "Updates a single weapon entry",
+        security: [{ bearerAuth: [] }],
+      },
     },
   )
-  /**
-   * DELETE /api/weapon/:id
-   * Deletes a weapon entry. Requires authentication.
-   */
   .delete(
     "/weapon/:id",
     ({ params, headers }) => {
@@ -310,6 +319,11 @@ export const weaponRoutes = new Elysia({ prefix: "/api", detail: { hide: false }
     {
       params: t.Object({ id: t.Numeric() }),
       headers: t.Object({ authorization: t.String() }),
+      detail: {
+        summary: "Delete weapon",
+        description: "Deletes a single weapon entry",
+        security: [{ bearerAuth: [] }],
+      },
     },
   )
 

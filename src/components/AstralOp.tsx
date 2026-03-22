@@ -41,9 +41,9 @@ export function AstralOp(props: SelectAstralOp) {
           </div>
         </div>
 
-        <div class="mx-4 mb-4 mt-8">
+        <div class="mx-4 mb-4 mt-4 md:mt-8">
           {/* Top row: node grid left, traits right */}
-          <div class="mb-4 grid grid-cols-2 gap-4">
+          <div class="mb-4 grid grid-cols-2 gap-2 md:gap-4">
             <div>
               {categoryMap.map(({ label, key, skills: categorySkills }) => {
                 if (!categorySkills || categorySkills.length === 0) return <></>
@@ -55,7 +55,7 @@ export function AstralOp(props: SelectAstralOp) {
                         <>
                           <button
                             id={`skill-node-${id}-${key}-${index}`}
-                            class={`flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border-2 text-xs font-bold transition-all duration-200 ${
+                            class={`flex h-7 w-7 cursor-pointer items-center justify-center rounded-full border-2 text-xs font-bold transition-all duration-200 md:h-8 md:w-8 ${
                               key === "synergy" && index === 0
                                 ? "border-violet-400 bg-violet-400/30 text-violet-300"
                                 : "border-slate-400 bg-slate-600 text-slate-300 hover:scale-105 hover:border-slate-100"
@@ -66,7 +66,7 @@ export function AstralOp(props: SelectAstralOp) {
                           >
                             {index + 1}
                           </button>
-                          {index < categorySkills.length - 1 && <div class="h-px w-4 bg-slate-500"></div>}
+                          {index < categorySkills.length - 1 && <div class="h-px w-2 bg-slate-500 md:w-4"></div>}
                         </>
                       ))}
                     </div>
@@ -75,7 +75,7 @@ export function AstralOp(props: SelectAstralOp) {
               })}
             </div>
 
-            <div class="mr-4 mt-10 text-right">
+            <div class="mr-4 mt-4 text-right md:mt-10">
               <p class="mb-1 text-xs uppercase tracking-wide text-slate-400">Damage Type</p>
               <p class="mb-3 font-medium capitalize text-slate-200">{damage}</p>
               {specializations && specializations.length > 0 && (
@@ -93,7 +93,7 @@ export function AstralOp(props: SelectAstralOp) {
           </div>
 
           {/* Full width skill content below */}
-          <div id={`skill-content-${id}`} class="mr-4 min-h-[100px] rounded-lg bg-slate-600/50 p-3">
+          <div id={`skill-content-${id}`} class="min-h-[100px] rounded-lg bg-slate-600/50 p-3">
             {firstSkill && (
               <>
                 <div class="mb-2 flex items-center gap-2">

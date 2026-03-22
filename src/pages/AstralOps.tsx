@@ -59,7 +59,7 @@ export const astralOpSkillPage = async ({ params }: { params: { id: number; cate
           <div id={`skill-node-${astralOp.id}-${key}-${i}`} hx-swap-oob="outerHTML">
             <button
               id={`skill-node-${astralOp.id}-${key}-${i}`}
-              class={`flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border-2 text-xs font-bold transition-all duration-200 ${
+              class={`flex h-7 w-7 cursor-pointer items-center justify-center rounded-full border-2 text-xs font-bold transition-all duration-200 md:h-8 md:w-8 ${
                 key === params.category && i === params.index
                   ? "border-violet-400 bg-violet-400/30 text-violet-300"
                   : "border-slate-400 bg-slate-600 text-slate-300 hover:scale-105 hover:border-slate-100"

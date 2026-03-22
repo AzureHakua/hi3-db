@@ -3,7 +3,7 @@ import { Html } from "@elysiajs/html"
 export const Sidebar = () => (
   <aside
     id="sidebar"
-    class="absolute left-0 top-0 z-40 h-full w-full overflow-hidden overflow-y-auto bg-slate-800 px-4 pt-16"
+    class="absolute left-0 top-0 z-50 h-full w-full overflow-hidden overflow-y-auto bg-slate-800 px-4 pt-20"
   >
     <nav>
       <ul class="space-y-2 text-center">

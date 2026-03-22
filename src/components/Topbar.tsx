@@ -1,7 +1,7 @@
 import { Html } from "@elysiajs/html"
 
 export const TopNavbar = () => (
-  <nav class="fixed left-0 right-0 top-0 z-50 bg-slate-800 p-4">
+  <nav class="fixed left-0 right-0 top-0 z-60 bg-slate-800 p-4">
     <div class="flex items-center justify-between">
       <div class="flex items-center">
         <button

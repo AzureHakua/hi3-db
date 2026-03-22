@@ -2,7 +2,7 @@ import { Elysia, file, t } from "elysia"
 import { html } from "@elysiajs/html"
 import { cors } from "@elysiajs/cors"
 import { tailwind } from "@gtramontina.com/elysia-tailwind"
-import { openapi } from "@elysiajs/openapi"
+import { openapi, fromTypes } from "@elysiajs/openapi"
 import "./styles/tailwind.css"
 
 import { stigmataRoutes, weaponRoutes, astralOpRoutes } from "./backend/routes"
@@ -35,12 +35,25 @@ const app = new Elysia({
       documentation: {
         info: {
           title: "Prometheus Database API",
-          version: "1.1.0",
+          version: "1.2.0",
           description: "An API for Honkai Impact 3rd game data",
         },
+        components: {
+          securitySchemes: {
+            bearerAuth: {
+              type: "http",
+              scheme: "bearer",
+            },
+          },
+        },
+        tags: [
+          { name: "Stigmata", description: "Stigmata equipment data" },
+          { name: "Weapons", description: "Weapon data" },
+          { name: "AstralOps", description: "AstralOp data" },
+        ],
       },
       path: "/openapi",
-      exclude: { paths: ["/*", "/favicon.ico", "/img/*", "/js/*"] },
+      references: fromTypes(),
     }),
   )
   .use(stigmataRoutes)

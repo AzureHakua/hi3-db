@@ -15,13 +15,6 @@ if (!API_KEY) {
  *   Please use Stigmata whenever possible to avoid confusion unless there is a specific reason to use Stigma.
  */
 
-/**
- * Checks if the provided authorization header contains a valid API key.
- * @param {Object} params - The parameters object.
- * @param {Object} params.headers - The request headers.
- * @param {string} params.headers.authorization - The authorization header.
- * @throws {Error} If the authorization header is missing, invalid, or contains an invalid API key.
- */
 const checkAuth = ({ headers }: { headers: { authorization: string } }) => {
   if (!headers.authorization || !headers.authorization.startsWith("Bearer ")) {
     throw new Error("Missing or invalid Authorization header")
@@ -68,29 +61,6 @@ function parseSearchQuery(input: string) {
   return flags
 }
 
-/**
- * Retrieves stigmata based on the provided query parameters.
- * Supports special search flags for advanced filtering:
- *
- * @flags
- * -single | -1    Filter to stigmata with only one position
- * -set    | -3    Filter to stigmata with all three positions (T/M/B)
- * -t/m/b          Filter stigmata that have the position (T/M/B)
- * -effect "term"  Filter by skill or set effect description
- * -id <number>    Filter by stigmata ID, note that these not game IDS but internal database IDs
- *
- * @example
- * "-effect "physical" -set"      // 3-piece stigmata with physical in effect
- * "kiana -effect fire -single"   // single pieces with kiana in name and fire in effect
- * "-single"                      // all single-position stigmata
- *
- * @param {Object} params.query - The query parameters.
- * @param {string} params.query.name - Search term, may include flags above
- * @param {number} params.query.id - Direct ID lookup
- * @param {number} params.query.limit - Results per page (default 10)
- * @param {number} params.query.offset - Pagination offset
- * @returns {Object} { data, hasMore, hasFlags }
- */
 export const getStigmata = async ({ query }: { query: any }) => {
   console.log("getStigmata called with query:", query)
   const limit = query.limit ? Number(query.limit) : 10
@@ -203,11 +173,6 @@ const getFullStigmataData = async (stigmataData: any[]) => {
   })
 }
 
-/**
- * Creates a new stigmata entry.
- * @param {Object} params.body - The request body.
- * @returns {Object} The created stigmata object.
- */
 export const postStigmata = async ({ body }: { body: any }) => {
   console.log("postStigmata called")
   if (!body.name) {
@@ -262,11 +227,6 @@ export const postStigmata = async ({ body }: { body: any }) => {
   return newStigma
 }
 
-/**
- * Updates an existing stigmata entry with partial updates.
- * @param {Object} params.body - The request body.
- * @returns {Object} The updated stigmata object.
- */
 export const patchStigmata = async ({ params, body }: { params: { id: number }; body: any }) => {
   console.log("patchStigmata called", params)
 
@@ -422,11 +382,6 @@ export const patchStigmata = async ({ params, body }: { params: { id: number }; 
   })
 }
 
-/**
- * Deletes a stigmata entry.
- * @param {Object} params.id - The ID of the stigmata to delete.
- * @returns {Object} The success message.
- */
 export const deleteStigmata = async ({ params }: { params: { id: number } }) => {
   console.log("deleteStigmata called", params)
 
@@ -502,14 +457,11 @@ const stigmataBody = t.Object({
   ),
 })
 
-/**
- * Defines the routes for stigmata operations.
- */
-export const stigmataRoutes = new Elysia({ prefix: "/api", detail: { hide: false } })
-  /**
-   * GET /api/stigmata
-   * Retrieves stigmata based on query parameters.
-   */
+export const stigmataRoutes = new Elysia({
+  prefix: "/api",
+  detail: { hide: false },
+  tags: ["Stigmata"],
+})
   .get("/stigmata", getStigmata, {
     query: t.Object({
       id: t.Optional(t.Numeric()),
@@ -518,14 +470,22 @@ export const stigmataRoutes = new Elysia({ prefix: "/api", detail: { hide: false
           description: "Search term, supports flags: -single/-1, -set/-3, -t/-m/-b, -effect, -id",
         }),
       ),
-      limit: t.Optional(t.Numeric()),
-      offset: t.Optional(t.Numeric()),
+      limit: t.Optional(
+        t.Numeric({
+          description: "Limits the number of search results, default: 999",
+        }),
+      ),
+      offset: t.Optional(
+        t.Numeric({
+          description: "Pagination offset for load more, used when browsing unfiltered results",
+        }),
+      ),
     }),
+    detail: {
+      summary: "Get stigmata",
+      description: "Retrieve stigmata with optional search and flag-based filtering",
+    },
   })
-  /**
-   * POST /api/stigmata
-   * Creates a new stigmata entry. Requires authentication.
-   */
   .post(
     "/stigmata",
     ({ body, headers }) => {
@@ -538,12 +498,13 @@ export const stigmataRoutes = new Elysia({ prefix: "/api", detail: { hide: false
     {
       body: t.Union([stigmataBody, t.Array(stigmataBody)]),
       headers: t.Object({ authorization: t.String() }),
+      detail: {
+        summary: "Create stigmata",
+        description: "Create one or multiple stigmata entries",
+        security: [{ bearerAuth: [] }],
+      },
     },
   )
-  /**
-   * PATCH /api/stigmata/:id
-   * Updates an existing stigmata entry. Requires authentication.
-   */
   .patch(
     "/stigmata/:id",
     ({ params, body, headers }) => {
@@ -559,7 +520,9 @@ export const stigmataRoutes = new Elysia({ prefix: "/api", detail: { hide: false
           name: t.String(),
           positions: t.Array(
             t.Object({
-              position: t.UnionEnum(["T", "M", "B"]), // Required - tells us which position to update
+              position: t.UnionEnum(["T", "M", "B"], {
+                description: "Required to know which position to update",
+              }),
               ...t.Partial(
                 t.Object({
                   name: t.String(),
@@ -580,7 +543,9 @@ export const stigmataRoutes = new Elysia({ prefix: "/api", detail: { hide: false
           ),
           images: t.Array(
             t.Object({
-              position: t.UnionEnum(["T", "M", "B"]), // Required
+              position: t.UnionEnum(["T", "M", "B"], {
+                description: "Required to know which position to update",
+              }),
               imgUrl: t.String(),
             }),
           ),
@@ -596,12 +561,13 @@ export const stigmataRoutes = new Elysia({ prefix: "/api", detail: { hide: false
         }),
       ),
       headers: t.Object({ authorization: t.String() }),
+      detail: {
+        summary: "Patch stigmata",
+        description: "Updates a single stigmata entry",
+        security: [{ bearerAuth: [] }],
+      },
     },
   )
-  /**
-   * DELETE /api/stigmata/:id
-   * Deletes a stigmata entry. Requires authentication.
-   */
   .delete(
     "/stigmata/:id",
     ({ params, headers }) => {
@@ -611,6 +577,11 @@ export const stigmataRoutes = new Elysia({ prefix: "/api", detail: { hide: false
     {
       params: t.Object({ id: t.Numeric() }),
       headers: t.Object({ authorization: t.String() }),
+      detail: {
+        summary: "Delete stigmata",
+        description: "Deletes a single stigmata entry",
+        security: [{ bearerAuth: [] }],
+      },
     },
   )
 

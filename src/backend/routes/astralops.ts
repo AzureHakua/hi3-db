@@ -246,13 +246,13 @@ const skillBody = t.Object({
   skillName: t.String(),
   skillDescription: t.String(),
   unlock: t.UnionEnum(["S", "SS", "SSS"]),
-  imgUrl: t.Optional(t.String()),
+  imgUrl: t.Nullable(t.String()),
 })
 
 // Define astralop shape
 const astralOpBody = t.Object({
   name: t.String(),
-  imgUrl: t.Optional(t.String()),
+  imgUrl: t.String(),
   damage: t.String(),
   specializations: t.Optional(
     t.Array(
@@ -262,34 +262,29 @@ const astralOpBody = t.Object({
       }),
     ),
   ),
-  skills: t.Optional(
-    t.Object({
-      synergy: t.Optional(t.Array(skillBody)),
-      recharge: t.Optional(t.Array(skillBody)),
-      passive: t.Optional(t.Array(skillBody)),
-    }),
-  ),
+  skills: t.Object({
+    synergy: t.Array(skillBody),
+    recharge: t.Array(skillBody),
+    passive: t.Array(skillBody),
+  }),
 })
 
-/**
- * Defines the routes for astralop operations.
- */
-export const astralOpRoutes = new Elysia({ prefix: "/api", detail: { hide: false } })
-  /**
-   * GET /api/astralop
-   * Retrieves astralop based on query parameters.
-   */
+export const astralOpRoutes = new Elysia({
+  prefix: "/api",
+  detail: { hide: false },
+  tags: ["AstralOps"],
+})
   .get("/astralop", getAstralOp, {
     query: t.Object({
       id: t.Optional(t.Numeric()),
       name: t.Optional(t.String()),
       limit: t.Optional(t.Numeric()),
     }),
+    detail: {
+      summary: "Get AstralOp",
+      description: "Retrieve AstralOps by search term",
+    },
   })
-  /**
-   * POST /api/astralop
-   * Creates a new astralop entry. Requires authentication.
-   */
   .post(
     "/astralop",
     ({ body, headers }) => {
@@ -302,12 +297,13 @@ export const astralOpRoutes = new Elysia({ prefix: "/api", detail: { hide: false
     {
       body: t.Union([astralOpBody, t.Array(astralOpBody)]),
       headers: t.Object({ authorization: t.String() }),
+      detail: {
+        summary: "Create AstralOp",
+        description: "Create one or more AstralOp entries",
+        security: [{ bearerAuth: [] }],
+      },
     },
   )
-  /**
-   * PATCH /api/astralop/:id
-   * Updates an existing astralop entry. Requires authentication.
-   */
   .patch(
     "/astralop/:id",
     ({ params, body, headers }) => {
@@ -358,12 +354,13 @@ export const astralOpRoutes = new Elysia({ prefix: "/api", detail: { hide: false
         }),
       ),
       headers: t.Object({ authorization: t.String() }),
+      detail: {
+        summary: "Patch AstralOp",
+        description: "Updates a single AstralOp entry",
+        security: [{ bearerAuth: [] }],
+      },
     },
   )
-  /**
-   * DELETE /api/astralop/:id
-   * Deletes an astralop entry. Requires authentication.
-   */
   .delete(
     "/astralop/:id",
     ({ params, headers }) => {
@@ -373,6 +370,11 @@ export const astralOpRoutes = new Elysia({ prefix: "/api", detail: { hide: false
     {
       params: t.Object({ id: t.Numeric() }),
       headers: t.Object({ authorization: t.String() }),
+      detail: {
+        summary: "Delete AstralOp",
+        description: "Deletes a single AstralOp entry",
+        security: [{ bearerAuth: [] }],
+      },
     },
   )
 

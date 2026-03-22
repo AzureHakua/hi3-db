@@ -18,44 +18,35 @@ export function Weapon(props: SelectWeapon) {
           </div>
 
           <div class="text-slate-300">
-            <div class="m-4 flex items-center justify-center">
-              <div class="p-4">
-                <p class="text-lg font-medium">ATK: {atk}</p>
+            <div class="m-2 flex items-center justify-center sm:m-4">
+              <div class="p-2 sm:p-4">
+                <p class="text-base font-medium sm:text-lg">ATK: {atk}</p>
               </div>
-              <div class="p-4">
-                <p class="text-lg font-medium">CRT: {crt}</p>
+              <div class="p-2 sm:p-4">
+                <p class="text-base font-medium sm:text-lg">CRT: {crt}</p>
               </div>
             </div>
           </div>
         </div>
 
-        <div class="mx-4 mt-4 flex flex-col justify-end">
-          <div class="mt-2 flex justify-center">
+        <div class="mx-4 mt-2 flex flex-col justify-end md:mt-4">
+          <div class="flex justify-center">
             <img
               src={maxImage ?? ""}
               alt={`${name}`}
-              class="flex max-h-full max-w-full rounded border-2 border-slate-400 object-cover"
+              class="max-h-48 max-w-full rounded border-2 border-slate-400 object-cover sm:max-h-full"
             />
-          </div>
-
-          {/* ID section - dedicated space below image */}
-          <div class="mt-2">
-            <div class="text-center">
-              <span class="rounded border border-slate-600 bg-slate-800/80 px-3 py-1.5 font-mono text-xs text-slate-400">
-                ID: {String(id).padStart(3, "0")}
-              </span>
-            </div>
           </div>
         </div>
       </div>
 
       <div class="col-span-2 mx-4 mb-4 flex flex-col">
         {skills && skills.length > 0 && (
-          <div class="border-t border-slate-700 p-4 text-sm text-slate-200">
+          <div class="border-t border-slate-700 p-3 text-sm text-slate-200 sm:p-4">
             {skills.map((skill) => (
               <div>
-                <p class="text-lg font-medium text-slate-300">{skill.skillName}</p>
-                <p class="mb-4 mt-2 text-sm text-slate-400">{skill.skillDescription}</p>
+                <p class="text-base font-medium text-slate-300 sm:text-lg">{skill.skillName}</p>
+                <p class="mt-1 text-sm text-slate-400">{skill.skillDescription}</p>
               </div>
             ))}
           </div>
