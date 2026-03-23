@@ -10,13 +10,6 @@ if (!API_KEY) {
   process.exit(1)
 }
 
-/**
- * Checks if the provided authorization header contains a valid API key.
- * @param {Object} params - The parameters object.
- * @param {Object} params.headers - The request headers.
- * @param {string} params.headers.authorization - The authorization header.
- * @throws {Error} If the authorization header is missing, invalid, or contains an invalid API key.
- */
 const checkAuth = ({ headers }: { headers: { authorization: string } }) => {
   if (!headers.authorization || !headers.authorization.startsWith("Bearer ")) {
     throw new Error("Missing or invalid Authorization header")
@@ -27,11 +20,6 @@ const checkAuth = ({ headers }: { headers: { authorization: string } }) => {
   }
 }
 
-/**
- * Retrieves astralop based on the provided query parameters.
- * @param {Object} params.query - The query parameters.
- * @returns {Array} An array of astralop objects.
- */
 export const getAstralOp = async ({ query }: { query: any }) => {
   console.log("getAstralOp called with query:", query)
   let astralOpData
@@ -91,11 +79,6 @@ export const getAstralOp = async ({ query }: { query: any }) => {
   return fullData
 }
 
-/**
- * Creates a new astralop entry.
- * @param {Object} params.body - The request body.
- * @returns {Object} The created astralop object.
- */
 export const postAstralOp = async ({ body }: { body: any }) => {
   console.log("postAstralOp called")
   if (!body.name) {
@@ -151,11 +134,6 @@ export const postAstralOp = async ({ body }: { body: any }) => {
   return newAstralOp
 }
 
-/**
- * Updates an existing astralop entry with partial updates.
- * @param {Object} params.body - The request body.
- * @returns {Object} The updated astralop object.
- */
 export const patchAstralOp = async ({ params, body }: { params: { id: number }; body: any }) => {
   console.log("patchAstralOp called", params)
 
@@ -221,11 +199,6 @@ export const patchAstralOp = async ({ params, body }: { params: { id: number }; 
   })
 }
 
-/**
- * Deletes an astralop entry.
- * @param {Object} params.id - The ID of the astralop to delete.
- * @returns {Object} The success message.
- */
 export const deleteAstralOp = async ({ params }: { params: { id: number } }) => {
   console.log("deleteAstralOp called", params)
 

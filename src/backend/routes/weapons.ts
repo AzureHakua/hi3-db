@@ -10,13 +10,6 @@ if (!API_KEY) {
   process.exit(1)
 }
 
-/**
- * Checks if the provided authorization header contains a valid API key.
- * @param {Object} params - The parameters object.
- * @param {Object} params.headers - The request headers.
- * @param {string} params.headers.authorization - The authorization header.
- * @throws {Error} If the authorization header is missing, invalid, or contains an invalid API key.
- */
 const checkAuth = ({ headers }: { headers: { authorization: string } }) => {
   if (!headers.authorization || !headers.authorization.startsWith("Bearer ")) {
     throw new Error("Missing or invalid Authorization header")
@@ -27,11 +20,6 @@ const checkAuth = ({ headers }: { headers: { authorization: string } }) => {
   }
 }
 
-/**
- * Retrieves weapon based on the provided query parameters.
- * @param {Object} params.query - The query parameters.
- * @returns {Array} An array of weapon objects.
- */
 export const getWeapon = async ({ query }: { query: any }) => {
   console.log("getWeapon called with query:", query)
   let weaponData
@@ -77,11 +65,6 @@ export const getWeapon = async ({ query }: { query: any }) => {
   return fullData
 }
 
-/**
- * Creates a new weapon entry.
- * @param {Object} params.body - The request body.
- * @returns {Object} The created weapon object.
- */
 export const postWeapon = async ({ body }: { body: any }) => {
   console.log("postWeapon called")
   if (!body.name) {
@@ -125,13 +108,6 @@ export const postWeapon = async ({ body }: { body: any }) => {
   return newWeapon
 }
 
-/**
- * Updates an existing weapon entry with partial updates.
- * @param {Object} params - The parameters object.
- * @param {number} params.id - The weapon ID.
- * @param {Object} params.body - The request body.
- * @returns {Object} The updated weapon object.
- */
 export const patchWeapon = async ({ params, body }: { params: { id: number }; body: any }) => {
   console.log("patchWeapon called", params)
 
@@ -189,11 +165,6 @@ export const patchWeapon = async ({ params, body }: { params: { id: number }; bo
   })
 }
 
-/**
- * Deletes a weapon entry.
- * @param {Object} params.id - The ID of the weapon to delete.
- * @returns {Object} The success message.
- */
 export const deleteWeapon = async ({ params }: { params: { id: number } }) => {
   console.log("deleteWeapon called", params)
   await db.transaction(async (tx) => {

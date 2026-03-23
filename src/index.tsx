@@ -15,7 +15,6 @@ import { aboutPage } from "./pages/About"
 
 const app = new Elysia({
   normalize: true,
-  sanitize: (value) => Bun.escapeHTML(value),
   detail: { hide: true },
   nativeStaticResponse: true,
   serve: { idleTimeout: 30 },
@@ -53,7 +52,6 @@ const app = new Elysia({
         ],
       },
       path: "/openapi",
-      references: fromTypes(),
     }),
   )
   .use(stigmataRoutes)
