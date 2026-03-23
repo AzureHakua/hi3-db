@@ -2,7 +2,7 @@ import { Html } from "@elysiajs/html"
 import { Layout } from "../layout"
 import { SearchBar } from "../components/SearchBar"
 import { AstralOp, AstralOpList } from "../components"
-import { getAstralOp } from "../backend/routes"
+import { getAstralOp } from "../backend/modules"
 
 export const astralOpsPage = () => (
   <Layout>
@@ -46,7 +46,7 @@ export const astralOpsDetailPage = async ({ params }: { params: { id: number } }
   return (
     <Layout>
       <div class="3xl:max-w-screen-xl mx-auto my-4 grid w-full max-w-5xl grid-cols-1 gap-4">
-        <AstralOp {...result[0]} />
+        <AstralOp {...result[0]} linkable={false} />
       </div>
     </Layout>
   )

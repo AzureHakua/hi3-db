@@ -2,7 +2,7 @@ import { Html } from "@elysiajs/html"
 import { Layout } from "../layout"
 import { SearchBar } from "../components/SearchBar"
 import { Stigma, StigmataList } from "../components"
-import { getStigmata } from "../backend/routes"
+import { getStigmata } from "../backend/modules"
 
 export const stigmataPage = () => (
   <Layout>

@@ -2,7 +2,7 @@ import { Html } from "@elysiajs/html"
 import { Layout } from "../layout"
 import { SearchBar } from "../components/SearchBar"
 import { Weapon, WeaponList } from "../components"
-import { getWeapon } from "../backend/routes"
+import { getWeapon } from "../backend/modules"
 
 export const weaponsPage = () => (
   <Layout>

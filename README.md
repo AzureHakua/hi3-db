@@ -2,7 +2,7 @@
 
 A fan-made database for Honkai Impact 3rd, providing a searchable reference for weapons, stigmata, AstralOps, and more. Built with Bun, Elysia.js, HTMX, and Turso.
 
-[Live Site](https://hi3.azurehakua.moe) | [API Documentation](https://hi3.azurehakua.moe/openapi)
+[Live Site](https://prometheus.moe) | [API Documentation](https://prometheus.moe/openapi)
 
 ## Tech Stack
 
@@ -40,10 +40,9 @@ TURSO_AUTH_TOKEN='your-auth-token'
 API_KEY='your-chosen-api-key'
 ```
 
-4. Run migrations
+4. Push the schema to your database
 ```bash
-bun run drizzle-kit generate
-bun run drizzle-kit migrate
+bunx drizzle-kit push
 ```
 
 5. Start the development server
@@ -56,24 +55,36 @@ bun dev
 src/
 ├── backend/
 │   ├── db/
-│   │   ├── schema.ts         # Drizzle database schemas
-│   │   ├── counts.ts         # Entity count queries
-│   │   └── index.ts          # Database connection
-│   └── routes/
-│       ├── index.ts          # Barrel exports
-│       ├── stigmata.ts       # Stigmata CRUD + search
-│       ├── weapons.ts        # Weapon CRUD
-│       └── astralops.ts      # AstralOps CRUD
+│   │   ├── schema.ts              # Drizzle database schemas
+│   │   ├── counts.ts              # Entity count queries
+│   │   └── index.ts               # Database connection
+│   ├── modules/
+│   │   ├── index.ts               # Barrel exports
+│   │   ├── stigmata/
+│   │   │   ├── model.ts           # Stigmata validators and types
+│   │   │   ├── service.ts         # Stigmata DB logic
+│   │   │   └── index.ts           # Stigmata routes (controller)
+│   │   ├── weapons/
+│   │   │   ├── model.ts           # Weapon validators and types
+│   │   │   ├── service.ts         # Weapon DB logic
+│   │   │   └── index.ts           # Weapon routes (controller)
+│   │   └── astralops/
+│   │       ├── model.ts           # AstralOp validators and types
+│   │       ├── service.ts         # AstralOp DB logic
+│   │       └── index.ts           # AstralOp routes (controller)
+│   └── utils/
+│       └── auth.ts                # API key authentication
 ├── components/
-│   ├── index.ts              # Barrel exports
-│   ├── Stigma.tsx            # Stigmata card
-│   ├── StigmataList.tsx      # Stigmata grid
-│   ├── Weapon.tsx            # Weapon card
-│   ├── WeaponList.tsx        # Weapon grid
-│   ├── AstralOp.tsx          # AstralOp card
-│   ├── AstralOpList.tsx      # AstralOp grid
-│   ├── Sidebar.tsx           # Navigation sidebar
-│   └── Topbar.tsx            # Top navigation
+│   ├── index.ts                   # Barrel exports
+│   ├── Stigma.tsx                 # Stigmata card
+│   ├── StigmataList.tsx           # Stigmata grid
+│   ├── Weapon.tsx                 # Weapon card
+│   ├── WeaponList.tsx             # Weapon grid
+│   ├── AstralOp.tsx               # AstralOp card
+│   ├── AstralOpList.tsx           # AstralOp grid
+│   ├── Sidebar.tsx                # Navigation sidebar
+│   ├── Topbar.tsx                 # Top navigation
+│   └── SearchBar.tsx              # Search bar
 ├── pages/
 │   ├── Home.tsx
 │   ├── Valkyries.tsx
@@ -81,10 +92,10 @@ src/
 │   ├── Stigmata.tsx
 │   ├── AstralOps.tsx
 │   └── About.tsx
-├── layout.tsx
+├── layout.tsx                     # Layout + UnderConstruction component
 ├── styles/
 │   └── tailwind.css
-└── index.tsx                 # App entry + route registration
+└── index.tsx                      # App entry + route registration
 ```
 
 ## API Endpoints
@@ -119,7 +130,7 @@ All endpoints are documented interactively at `/openapi`.
 ```
 GET /api/stigmata?name=Mei
 GET /api/stigmata?id=1
-GET /api/weapon?name=Mag-Typhoon&limit=5
+GET /api/weapon?name=Thunderbolt&limit=5
 ```
 
 ## Stigmata Search Flags
