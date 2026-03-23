@@ -75,7 +75,7 @@ export function AstralOp(props: SelectAstralOp) {
             </div>
 
             {/* Traits */}
-            <div class="mt-4 text-right md:mt-10">
+            <div class="mt-4 text-right">
               <p class="mb-1 text-xs uppercase tracking-wide text-slate-400">Damage Type</p>
               <p class="mb-3 font-medium capitalize text-slate-200">{damage}</p>
               {(specializations?.length ?? 0) > 0 && (
