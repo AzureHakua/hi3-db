@@ -1,31 +1,18 @@
-import { Elysia, t } from "elysia"
-import { db } from "../db"
-import { stigmata, stigmataPositions, stigmataStats, stigmataImages, stigmataSetEffects } from "../db/schema"
-import { sql, eq, and, like, inArray, desc } from "drizzle-orm"
-
-const API_KEY = process.env.API_KEY
-
-if (!API_KEY) {
-  console.error("API_KEY is not set in environment variables")
-  process.exit(1)
-}
+import { db } from "../../db"
+import { stigmata, stigmataPositions, stigmataStats, stigmataImages, stigmataSetEffects } from "../../db/schema"
+import { eq, and, like, inArray, desc, sql } from "drizzle-orm"
 
 /**
- * ! When dealing with the Stigmata, please note that Stigma is singular and Stigmata is plural.
- *   Please use Stigmata whenever possible to avoid confusion unless there is a specific reason to use Stigma.
+ * Parses a search query string and extracts flags for advanced filtering.
+ *
+ * @flags
+ * -single | -1    Filter to stigmata with only one position
+ * -set    | -3    Filter to stigmata with all three positions (T/M/B)
+ * -t/m/b          Filter stigmata that have the position (T/M/B)
+ * -effect "term"  Filter by skill or set effect description
+ * -id <number>    Filter by stigmata ID
  */
-
-const checkAuth = ({ headers }: { headers: { authorization: string } }) => {
-  if (!headers.authorization || !headers.authorization.startsWith("Bearer ")) {
-    throw new Error("Missing or invalid Authorization header")
-  }
-  const token = headers.authorization.split(" ")[1]
-  if (token !== API_KEY) {
-    throw new Error("Invalid API key")
-  }
-}
-
-function parseSearchQuery(input: string) {
+export function parseSearchQuery(input: string) {
   const flags = {
     name: "",
     effect: "",
@@ -61,85 +48,7 @@ function parseSearchQuery(input: string) {
   return flags
 }
 
-export const getStigmata = async ({ query }: { query: any }) => {
-  console.log("getStigmata called with query:", query)
-  const limit = query.limit ? Number(query.limit) : 10
-  const offset = query.offset ? Number(query.offset) : 0
-
-  let stigmataData
-
-  if (query.id) {
-    stigmataData = await db
-      .select()
-      .from(stigmata)
-      .where(eq(stigmata.id, Number(query.id)))
-    const fullData = await getFullStigmataData(stigmataData)
-    return { data: fullData, hasMore: false, hasFlags: false }
-  }
-
-  const searchTerm = query.name?.$like?.replace(/%/g, "") || query.name?.replace(/\+/g, " ") || ""
-  const flags = parseSearchQuery(searchTerm)
-  console.log("flags:", flags)
-  const fetchAll = !!flags.name || !!flags.effect || flags.single || flags.set
-  const useLoadMore = !fetchAll
-  const fetchLimit = fetchAll ? 999 : limit + 1
-
-  if (flags.id) {
-    stigmataData = await db.select().from(stigmata).where(eq(stigmata.id, flags.id))
-  } else if (flags.name) {
-    stigmataData = await db
-      .select()
-      .from(stigmata)
-      .where(like(stigmata.name, `%${flags.name}%`))
-      .orderBy(desc(stigmata.id))
-      .limit(fetchAll ? 999 : useLoadMore ? fetchLimit : limit)
-      .offset(fetchAll ? 0 : offset)
-  } else {
-    stigmataData = await db
-      .select()
-      .from(stigmata)
-      .orderBy(desc(stigmata.id))
-      .limit(fetchAll ? 999 : useLoadMore ? fetchLimit : limit)
-      .offset(fetchAll ? 0 : offset)
-      .all()
-  }
-
-  let fullData = await getFullStigmataData(stigmataData)
-
-  // Post-filter
-  if (flags.single) fullData = fullData.filter((s) => s.positions.length === 1)
-  if (flags.set) fullData = fullData.filter((s) => s.positions.length === 3)
-  // Filter by position if specified
-  if (flags.position) {
-    fullData = fullData.filter((s) =>
-      s.positions.some((p: typeof stigmataPositions.$inferSelect) => p.position === flags.position),
-    )
-  }
-
-  // Filter by effect if specified
-  if (flags.effect) {
-    const term = flags.effect.toLowerCase()
-    fullData = fullData.filter(
-      (s) =>
-        s.positions
-          .filter((p: typeof stigmataPositions.$inferSelect) => (flags.position ? p.position === flags.position : true))
-          .some((p: typeof stigmataPositions.$inferSelect) => p.skillDescription?.toLowerCase().includes(term)) ||
-        (!flags.position &&
-          (s.setEffects?.twoPieceEffect?.toLowerCase().includes(term) ||
-            s.setEffects?.threePieceEffect?.toLowerCase().includes(term))),
-    )
-  }
-
-  if (flags.single || flags.set || flags.effect) {
-    return { data: fullData, hasMore: false, hasFlags: true }
-  }
-
-  const hasMore = useLoadMore && fullData.length > limit
-  if (hasMore) fullData = fullData.slice(0, limit)
-  return { data: fullData, hasMore, hasFlags: useLoadMore }
-}
-
-const getFullStigmataData = async (stigmataData: any[]) => {
+export const getFullStigmataData = async (stigmataData: any[]) => {
   if (stigmataData.length === 0) return []
 
   const stigmataIds = stigmataData.map((s) => s.id)
@@ -173,13 +82,81 @@ const getFullStigmataData = async (stigmataData: any[]) => {
   })
 }
 
-export const postStigmata = async ({ body }: { body: any }) => {
-  console.log("postStigmata called")
-  if (!body.name) {
-    throw new Error("Stigmata name is required")
+export const getStigmata = async ({ query }: { query: any }) => {
+  const limit = query.limit ? Number(query.limit) : 10
+  const offset = query.offset ? Number(query.offset) : 0
+
+  let stigmataData
+
+  if (query.id) {
+    stigmataData = await db
+      .select()
+      .from(stigmata)
+      .where(eq(stigmata.id, Number(query.id)))
+    const fullData = await getFullStigmataData(stigmataData)
+    return { data: fullData, hasMore: false, hasFlags: false }
   }
 
-  const newStigma = await db.transaction(async (tx) => {
+  const searchTerm = query.name?.$like?.replace(/%/g, "") || query.name?.replace(/\+/g, " ") || ""
+  const flags = parseSearchQuery(searchTerm)
+  const fetchAll = !!flags.name || !!flags.effect || flags.single || flags.set || !!flags.position
+  const useLoadMore = !fetchAll
+
+  if (flags.id) {
+    stigmataData = await db.select().from(stigmata).where(eq(stigmata.id, flags.id))
+  } else if (flags.name) {
+    stigmataData = await db
+      .select()
+      .from(stigmata)
+      .where(like(stigmata.name, `%${flags.name}%`))
+      .orderBy(desc(stigmata.id))
+      .limit(fetchAll ? 999 : limit)
+      .offset(fetchAll ? 0 : offset)
+  } else {
+    stigmataData = await db
+      .select()
+      .from(stigmata)
+      .orderBy(desc(stigmata.id))
+      .limit(fetchAll ? 999 : limit + 1)
+      .offset(fetchAll ? 0 : offset)
+      .all()
+  }
+
+  let fullData = await getFullStigmataData(stigmataData)
+
+  if (flags.single) fullData = fullData.filter((s) => s.positions.length === 1)
+  if (flags.set) fullData = fullData.filter((s) => s.positions.length === 3)
+  if (flags.position) {
+    fullData = fullData.filter((s) =>
+      s.positions.some((p: typeof stigmataPositions.$inferSelect) => p.position === flags.position),
+    )
+  }
+  if (flags.effect) {
+    const term = flags.effect.toLowerCase()
+    fullData = fullData.filter(
+      (s) =>
+        s.positions
+          .filter((p: typeof stigmataPositions.$inferSelect) => (flags.position ? p.position === flags.position : true))
+          .some((p: typeof stigmataPositions.$inferSelect) => p.skillDescription?.toLowerCase().includes(term)) ||
+        (!flags.position &&
+          (s.setEffects?.twoPieceEffect?.toLowerCase().includes(term) ||
+            s.setEffects?.threePieceEffect?.toLowerCase().includes(term))),
+    )
+  }
+
+  if (flags.single || flags.set || flags.effect) {
+    return { data: fullData, hasMore: false, hasFlags: true }
+  }
+
+  const hasMore = useLoadMore && fullData.length > limit
+  if (hasMore) fullData = fullData.slice(0, limit)
+  return { data: fullData, hasMore, hasFlags: useLoadMore }
+}
+
+export const postStigmata = async ({ body }: { body: any }) => {
+  if (!body.name) throw new Error("Stigmata name is required")
+
+  return await db.transaction(async (tx) => {
     const stigmataResult = await tx.insert(stigmata).values({ name: body.name }).returning().get()
 
     if (body.positions) {
@@ -223,25 +200,17 @@ export const postStigmata = async ({ body }: { body: any }) => {
 
     return stigmataResult
   })
-
-  return newStigma
 }
 
 export const patchStigmata = async ({ params, body }: { params: { id: number }; body: any }) => {
-  console.log("patchStigmata called", params)
-
   return await db.transaction(async (tx) => {
     const stigmataResult = await tx.select().from(stigmata).where(eq(stigmata.id, params.id)).get()
-    if (!stigmataResult) {
-      throw new Error("Stigmata not found")
-    }
+    if (!stigmataResult) throw new Error("Stigmata not found")
 
-    // Update stigmata name if provided
     if (body.name) {
       await tx.update(stigmata).set({ name: body.name }).where(eq(stigmata.id, params.id))
     }
 
-    // Update positions if provided
     if (body.positions) {
       const positionsToUpdate = Array.isArray(body.positions) ? body.positions : [body.positions]
 
@@ -253,18 +222,15 @@ export const patchStigmata = async ({ params, body }: { params: { id: number }; 
           .get()
 
         if (existingPosition) {
-          // Only update fields that are provided (partial update)
           const updateData: any = {}
           if (pos.name !== undefined) updateData.name = pos.name
           if (pos.skillName !== undefined) updateData.skillName = pos.skillName
           if (pos.skillDescription !== undefined) updateData.skillDescription = pos.skillDescription
 
-          // Only update if there's something to update
           if (Object.keys(updateData).length > 0) {
             await tx.update(stigmataPositions).set(updateData).where(eq(stigmataPositions.id, existingPosition.id))
           }
 
-          // Update stats if provided
           if (pos.stats) {
             const statsUpdateData: any = {}
             if (pos.stats.hp !== undefined) statsUpdateData.hp = Number(pos.stats.hp)
@@ -281,10 +247,7 @@ export const patchStigmata = async ({ params, body }: { params: { id: number }; 
             }
           }
         } else {
-          // Create new position (all required fields must be provided)
-          if (!pos.name) {
-            throw new Error(`Position name is required when creating new position ${pos.position}`)
-          }
+          if (!pos.name) throw new Error(`Position name is required when creating new position ${pos.position}`)
 
           const newPosition = await tx
             .insert(stigmataPositions)
@@ -298,7 +261,6 @@ export const patchStigmata = async ({ params, body }: { params: { id: number }; 
             .returning()
             .get()
 
-          // Create stats if provided
           if (pos.stats) {
             await tx.insert(stigmataStats).values({
               positionId: newPosition.id,
@@ -313,12 +275,10 @@ export const patchStigmata = async ({ params, body }: { params: { id: number }; 
       }
     }
 
-    // Update images if provided
     if (body.images) {
       const imagesToUpdate = Array.isArray(body.images) ? body.images : [body.images]
 
       for (const img of imagesToUpdate) {
-        // Check if image exists for this position
         const existingImage = await tx
           .select()
           .from(stigmataImages)
@@ -326,10 +286,8 @@ export const patchStigmata = async ({ params, body }: { params: { id: number }; 
           .get()
 
         if (existingImage && img.imgUrl !== undefined) {
-          // Update existing image
           await tx.update(stigmataImages).set({ imgUrl: img.imgUrl }).where(eq(stigmataImages.id, existingImage.id))
         } else if (!existingImage && img.imgUrl) {
-          // Create new image
           await tx.insert(stigmataImages).values({
             stigmataId: params.id,
             position: img.position,
@@ -339,7 +297,6 @@ export const patchStigmata = async ({ params, body }: { params: { id: number }; 
       }
     }
 
-    // Update set effects if provided
     if (body.setEffects) {
       const existingSetEffect = await tx
         .select()
@@ -348,7 +305,6 @@ export const patchStigmata = async ({ params, body }: { params: { id: number }; 
         .get()
 
       if (existingSetEffect) {
-        // Only update fields that are provided (partial update)
         const setEffectsUpdateData: any = {}
         if (body.setEffects.setName !== undefined) setEffectsUpdateData.setName = body.setEffects.setName
         if (body.setEffects.twoPieceName !== undefined) setEffectsUpdateData.twoPieceName = body.setEffects.twoPieceName
@@ -366,7 +322,6 @@ export const patchStigmata = async ({ params, body }: { params: { id: number }; 
             .where(eq(stigmataSetEffects.stigmataId, params.id))
         }
       } else {
-        // Create new set effect
         await tx.insert(stigmataSetEffects).values({
           stigmataId: params.id,
           setName: body.setEffects.setName || null,
@@ -383,33 +338,20 @@ export const patchStigmata = async ({ params, body }: { params: { id: number }; 
 }
 
 export const deleteStigmata = async ({ params }: { params: { id: number } }) => {
-  console.log("deleteStigmata called", params)
-
   await db.transaction(async (tx) => {
-    // First, get all position IDs for this stigmata
     const positions = await tx
       .select({ id: stigmataPositions.id })
       .from(stigmataPositions)
       .where(eq(stigmataPositions.stigmataId, params.id))
 
-    // Delete stats for each position
     for (const position of positions) {
       await tx.delete(stigmataStats).where(eq(stigmataStats.positionId, position.id))
     }
 
-    // Delete positions
     await tx.delete(stigmataPositions).where(eq(stigmataPositions.stigmataId, params.id))
-
-    // Delete images
     await tx.delete(stigmataImages).where(eq(stigmataImages.stigmataId, params.id))
-
-    // Delete set effects
     await tx.delete(stigmataSetEffects).where(eq(stigmataSetEffects.stigmataId, params.id))
-
-    // Finally, delete the main stigmata record
     await tx.delete(stigmata).where(eq(stigmata.id, params.id))
-
-    // Reset auto-increment counters
     await tx.run(
       sql`DELETE FROM sqlite_sequence WHERE name IN ('stigmata', 'stigmata_positions', 'stigmata_stats', 'stigmata_images', 'stigmata_set_effects')`,
     )
@@ -417,175 +359,3 @@ export const deleteStigmata = async ({ params }: { params: { id: number } }) => 
 
   return { success: true }
 }
-
-// Define stigmata body
-const stigmataBody = t.Object({
-  name: t.String(),
-  positions: t.Optional(
-    t.Array(
-      t.Object({
-        position: t.UnionEnum(["T", "M", "B"]),
-        name: t.String(),
-        skillName: t.String(),
-        skillDescription: t.String(),
-        stats: t.Object({
-          hp: t.Nullable(t.Number()),
-          atk: t.Nullable(t.Number()),
-          def: t.Nullable(t.Number()),
-          crt: t.Nullable(t.Number()),
-          sp: t.Nullable(t.Number()),
-        }),
-      }),
-    ),
-  ),
-  images: t.Array(
-    t.Object({
-      position: t.UnionEnum(["T", "M", "B"]),
-      imgUrl: t.String(),
-    }),
-  ),
-  setEffects: t.Optional(
-    t.Partial(
-      t.Object({
-        setName: t.String(),
-        twoPieceName: t.String(),
-        twoPieceEffect: t.String(),
-        threePieceName: t.String(),
-        threePieceEffect: t.String(),
-      }),
-    ),
-  ),
-})
-
-export const stigmataRoutes = new Elysia({
-  prefix: "/api",
-  detail: { hide: false },
-  tags: ["Stigmata"],
-})
-  .get("/stigmata", getStigmata, {
-    query: t.Object({
-      id: t.Optional(t.Numeric()),
-      name: t.Optional(
-        t.String({
-          description: "Search term, supports flags: -single/-1, -set/-3, -t/-m/-b, -effect, -id",
-        }),
-      ),
-      limit: t.Optional(
-        t.Numeric({
-          description: "Limits the number of search results, default: 999",
-        }),
-      ),
-      offset: t.Optional(
-        t.Numeric({
-          description: "Pagination offset for load more, used when browsing unfiltered results",
-        }),
-      ),
-    }),
-    detail: {
-      summary: "Get stigmata",
-      description: "Retrieve stigmata with optional search and flag-based filtering",
-    },
-  })
-  .post(
-    "/stigmata",
-    ({ body, headers }) => {
-      checkAuth({ headers })
-      if (Array.isArray(body)) {
-        return Promise.all(body.map((entry) => postStigmata({ body: entry })))
-      }
-      return postStigmata({ body })
-    },
-    {
-      body: t.Union([stigmataBody, t.Array(stigmataBody)]),
-      headers: t.Object({ authorization: t.String() }),
-      detail: {
-        summary: "Create stigmata",
-        description: "Create one or multiple stigmata entries",
-        security: [{ bearerAuth: [] }],
-      },
-    },
-  )
-  .patch(
-    "/stigmata/:id",
-    ({ params, body, headers }) => {
-      checkAuth({ headers })
-      return patchStigmata({ params, body })
-    },
-    {
-      params: t.Object({
-        id: t.Numeric(),
-      }),
-      body: t.Partial(
-        t.Object({
-          name: t.String(),
-          positions: t.Array(
-            t.Object({
-              position: t.UnionEnum(["T", "M", "B"], {
-                description: "Required to know which position to update",
-              }),
-              ...t.Partial(
-                t.Object({
-                  name: t.String(),
-                  skillName: t.String(),
-                  skillDescription: t.String(),
-                  stats: t.Partial(
-                    t.Object({
-                      hp: t.Number(),
-                      atk: t.Number(),
-                      def: t.Number(),
-                      crt: t.Number(),
-                      sp: t.Number(),
-                    }),
-                  ),
-                }),
-              ).properties,
-            }),
-          ),
-          images: t.Array(
-            t.Object({
-              position: t.UnionEnum(["T", "M", "B"], {
-                description: "Required to know which position to update",
-              }),
-              imgUrl: t.String(),
-            }),
-          ),
-          setEffects: t.Partial(
-            t.Object({
-              setName: t.String(),
-              twoPieceName: t.String(),
-              twoPieceEffect: t.String(),
-              threePieceName: t.String(),
-              threePieceEffect: t.String(),
-            }),
-          ),
-        }),
-      ),
-      headers: t.Object({ authorization: t.String() }),
-      detail: {
-        summary: "Patch stigmata",
-        description: "Updates a single stigmata entry",
-        security: [{ bearerAuth: [] }],
-      },
-    },
-  )
-  .delete(
-    "/stigmata/:id",
-    ({ params, headers }) => {
-      checkAuth({ headers })
-      return deleteStigmata({ params })
-    },
-    {
-      params: t.Object({ id: t.Numeric() }),
-      headers: t.Object({ authorization: t.String() }),
-      detail: {
-        summary: "Delete stigmata",
-        description: "Deletes a single stigmata entry",
-        security: [{ bearerAuth: [] }],
-      },
-    },
-  )
-
-console.log(
-  "Stigmata routes loaded:",
-  stigmataRoutes.routes.map((r) => `${r.method} ${r.path}`),
-)

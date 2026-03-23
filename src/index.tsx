@@ -5,7 +5,7 @@ import { tailwind } from "@gtramontina.com/elysia-tailwind"
 import { openapi } from "@elysiajs/openapi"
 import "./styles/tailwind.css"
 
-import { stigmataRoutes, weaponRoutes, astralOpRoutes } from "./backend/routes"
+import { stigmataRoutes, weaponRoutes, astralOpRoutes } from "./backend/modules"
 import { homePage } from "./pages/Home"
 import { valkyriesPage } from "./pages/Valkyries"
 import { weaponsPage, weaponsListPage, weaponsDetailPage } from "./pages/Weapons"
@@ -19,6 +19,9 @@ const app = new Elysia({
   nativeStaticResponse: true,
   serve: { idleTimeout: 30 },
 })
+  .onError(({ code, error }) => {
+    if (code === "VALIDATION") return error.all[0]?.message ?? error.message
+  })
   .use(html())
   .use(cors())
   .use(

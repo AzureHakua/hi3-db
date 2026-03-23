@@ -2,14 +2,12 @@ import { Html } from "@elysiajs/html"
 import { SelectWeapon } from "../backend/db/schema"
 
 export function Weapon(props: SelectWeapon & { linkable?: boolean }) {
-  const { id, name, atk, crt, images, skills, linkable = true } = props
-  const maxImage = images?.[0]?.maxUrl ?? ""
+  const { id, name, atk, crt, baseUrl, maxUrl, skills, linkable = true } = props
   const firstSkill = skills?.[0]
   const restSkills = skills?.slice(1) ?? []
 
   return (
     <div class="overflow-hidden rounded-lg bg-slate-700 shadow-lg">
-      {/* Full-width name header */}
       <div class="mx-4 mt-4 flex items-center px-3">
         <hr class="w-full border-slate-600" />
         {linkable ? (
@@ -26,11 +24,10 @@ export function Weapon(props: SelectWeapon & { linkable?: boolean }) {
       </div>
 
       <div class="flex flex-col md:grid md:grid-cols-2">
-        {/* Left col: image + stats + first skill */}
         <div class="mx-4 mt-3 flex flex-col items-center gap-3 md:mb-4 md:mr-2">
-          {maxImage && (
+          {maxUrl && (
             <img
-              src={`/${maxImage}`}
+              src={`/${maxUrl}`}
               alt={name}
               class="max-w-full rounded border-2 border-slate-400 object-contain"
               loading="lazy"
@@ -49,7 +46,6 @@ export function Weapon(props: SelectWeapon & { linkable?: boolean }) {
           )}
         </div>
 
-        {/* Right col: remaining skills, vertically centered */}
         <div class="mx-4 my-4 flex flex-col justify-center gap-4 md:ml-2">
           {restSkills.map((skill) => (
             <div class="rounded-lg bg-slate-600/50 p-3">

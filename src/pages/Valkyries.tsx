@@ -8,7 +8,7 @@ import { Html } from "@elysiajs/html"
 import { Layout } from "../layout"
 import { SearchBar } from "../components/SearchBar"
 import { ValkyriesList } from "../components"
-import { getValkyrie } from "../backend/routes"
+import { getValkyrie } from "../backend/modules"
 
 export const valkyriesPage = () => (
   <Layout>
