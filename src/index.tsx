@@ -2,15 +2,15 @@ import { Elysia, file, t } from "elysia"
 import { html } from "@elysiajs/html"
 import { cors } from "@elysiajs/cors"
 import { tailwind } from "@gtramontina.com/elysia-tailwind"
-import { openapi, fromTypes } from "@elysiajs/openapi"
+import { openapi } from "@elysiajs/openapi"
 import "./styles/tailwind.css"
 
 import { stigmataRoutes, weaponRoutes, astralOpRoutes } from "./backend/routes"
 import { homePage } from "./pages/Home"
 import { valkyriesPage } from "./pages/Valkyries"
-import { weaponsPage, weaponsListPage } from "./pages/Weapons"
-import { stigmataPage, stigmataListPage, stigmataPositionPage } from "./pages/Stigmata"
-import { astralOpsPage, astralOpsListPage, astralOpSkillPage } from "./pages/AstralOps"
+import { weaponsPage, weaponsListPage, weaponsDetailPage } from "./pages/Weapons"
+import { stigmataPage, stigmataListPage, stigmataDetailPage } from "./pages/Stigmata"
+import { astralOpsPage, astralOpsListPage, astralOpsDetailPage } from "./pages/AstralOps"
 import { aboutPage } from "./pages/About"
 
 const app = new Elysia({
@@ -66,6 +66,9 @@ const app = new Elysia({
   .get("/weapon-list", weaponsListPage, {
     query: t.Object({ search: t.Optional(t.String()) }),
   })
+  .get("/weapons/:id", weaponsDetailPage, {
+    params: t.Object({ id: t.Numeric() }),
+  })
   .get("/stigmata", stigmataPage)
   .get("/stigmata-list", stigmataListPage, {
     query: t.Object({
@@ -73,19 +76,15 @@ const app = new Elysia({
       offset: t.Optional(t.String()),
     }),
   })
-  .get("/stigmata/:id/position/:index", stigmataPositionPage, {
-    params: t.Object({ id: t.Numeric(), index: t.Numeric() }),
+  .get("/stigmata/:id", stigmataDetailPage, {
+    params: t.Object({ id: t.Numeric() }),
   })
   .get("/astralops", astralOpsPage)
   .get("/astralops-list", astralOpsListPage, {
     query: t.Object({ search: t.Optional(t.String()) }),
   })
-  .get("/astralop/:id/skill/:category/:index", astralOpSkillPage, {
-    params: t.Object({
-      id: t.Numeric(),
-      category: t.String(),
-      index: t.Numeric(),
-    }),
+  .get("/astralops/:id", astralOpsDetailPage, {
+    params: t.Object({ id: t.Numeric() }),
   })
   .get("/about", aboutPage)
   .listen(3000)

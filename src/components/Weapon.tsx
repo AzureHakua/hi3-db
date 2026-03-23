@@ -1,8 +1,8 @@
 import { Html } from "@elysiajs/html"
 import { SelectWeapon } from "../backend/db/schema"
 
-export function Weapon(props: SelectWeapon) {
-  const { name, atk, crt, images, skills } = props
+export function Weapon(props: SelectWeapon & { linkable?: boolean }) {
+  const { id, name, atk, crt, images, skills, linkable = true } = props
   const maxImage = images?.[0]?.maxUrl ?? ""
   const firstSkill = skills?.[0]
   const restSkills = skills?.slice(1) ?? []
@@ -12,19 +12,30 @@ export function Weapon(props: SelectWeapon) {
       {/* Full-width name header */}
       <div class="mx-4 mt-4 flex items-center px-3">
         <hr class="w-full border-slate-600" />
-        <div class="mx-auto whitespace-nowrap rounded-full border px-3 py-1 font-semibold text-slate-300">{name}</div>
+        {linkable ? (
+          <a
+            href={`/weapons/${id}`}
+            class="mx-auto whitespace-nowrap rounded-full border px-3 py-1 font-semibold text-slate-300 transition-all duration-200"
+          >
+            {name}
+          </a>
+        ) : (
+          <div class="mx-auto whitespace-nowrap rounded-full border px-3 py-1 font-semibold text-slate-300">{name}</div>
+        )}
         <hr class="w-full border-slate-600" />
       </div>
 
       <div class="flex flex-col md:grid md:grid-cols-2">
         {/* Left col: image + stats + first skill */}
-        <div class="mx-4 mt-3 flex flex-col items-center gap-3 md:mr-2 md:mb-4">
-          <img
-            src={maxImage}
-            alt={name}
-            class="max-w-full rounded border-2 border-slate-400 object-contain"
-            loading="lazy"
-          />
+        <div class="mx-4 mt-3 flex flex-col items-center gap-3 md:mb-4 md:mr-2">
+          {maxImage && (
+            <img
+              src={`/${maxImage}`}
+              alt={name}
+              class="max-w-full rounded border-2 border-slate-400 object-contain"
+              loading="lazy"
+            />
+          )}
 
           <span class="rounded border border-slate-500 bg-slate-600/50 px-3 py-1 text-sm font-medium text-slate-200">
             ATK: {atk}&nbsp;&nbsp;&nbsp;CRT: {crt}

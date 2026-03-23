@@ -1,7 +1,7 @@
 import { Html } from "@elysiajs/html"
 import { Layout } from "../layout"
 import { SearchBar } from "../components/SearchBar"
-import { WeaponList } from "../components"
+import { Weapon, WeaponList } from "../components"
 import { getWeapon } from "../backend/routes"
 
 export const weaponsPage = () => (
@@ -33,4 +33,21 @@ export const weaponsListPage = async ({ query }: { query: { search?: string } })
     console.error("Error fetching weapons:", error)
     return <div class="text-slate-200">Error fetching weapons data</div>
   }
+}
+
+export const weaponsDetailPage = async ({ params }: { params: { id: number } }) => {
+  const result = await getWeapon({ query: { id: params.id } })
+  if (!result[0])
+    return (
+      <Layout>
+        <p class="text-center">Not found</p>
+      </Layout>
+    )
+  return (
+    <Layout>
+      <div class="3xl:max-w-screen-xl mx-auto my-4 grid w-full max-w-5xl grid-cols-1 gap-4">
+        <Weapon {...result[0]} linkable={false} />
+      </div>
+    </Layout>
+  )
 }

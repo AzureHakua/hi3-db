@@ -6,9 +6,8 @@ const ACTIVE_TAB = (i: number) =>
 const INACTIVE_TAB = (i: number) =>
   `flex-1 cursor-pointer py-1.5 text-center text-sm font-bold bg-slate-600 text-slate-300 hover:bg-slate-500 hover:text-slate-100 transition-all duration-200${i > 0 ? " border-l border-slate-400" : ""}`
 
-export function Stigma(props: SelectStigmata) {
-  const { id, name, positions, images, setEffects } = props
-  const bigImages = images?.filter((img) => img.imgUrl)
+export function Stigma(props: SelectStigmata & { linkable?: boolean }) {
+  const { id, name, positions, images, setEffects, linkable = true } = props
   const groupId = `stigma-${id}`
   const multi = (positions?.length ?? 0) > 1
 
@@ -17,7 +16,16 @@ export function Stigma(props: SelectStigmata) {
       {/* Full-width name header */}
       <div class="mx-4 mt-4 flex items-center px-3">
         <hr class="w-full border-slate-600" />
-        <div class="mx-auto whitespace-nowrap rounded-full border px-3 py-1 font-semibold text-slate-300">{name}</div>
+        {linkable ? (
+          <a
+            href={`/stigmata/${id}`}
+            class="mx-auto whitespace-nowrap rounded-full border px-3 py-1 font-semibold text-slate-300 transition-all duration-200"
+          >
+            {name}
+          </a>
+        ) : (
+          <div class="mx-auto whitespace-nowrap rounded-full border px-3 py-1 font-semibold text-slate-300">{name}</div>
+        )}
         <hr class="w-full border-slate-600" />
       </div>
 
@@ -28,17 +36,23 @@ export function Stigma(props: SelectStigmata) {
             {/* Image panels stacked, opacity switched */}
             <div class="relative aspect-square overflow-hidden rounded-t-lg border-2 border-b-0 border-slate-400">
               {positions?.map((pos, i) => (
-                <div data-image={groupId} class={`absolute inset-0 transition-opacity duration-150${i === 0 ? "" : " opacity-0 pointer-events-none"}`}>
-                  {bigImages?.find((img) => img.position === pos.position) ? (
-                    <img
-                      src={bigImages.find((img) => img.position === pos.position)!.imgUrl ?? ""}
-                      alt={`${name} ${pos.position}`}
-                      class="h-full w-full object-cover"
-                      loading="lazy"
-                    />
-                  ) : (
-                    <div class="flex h-full w-full items-center justify-center text-sm text-slate-500">No image</div>
-                  )}
+                <div
+                  data-image={groupId}
+                  class={`absolute inset-0 transition-opacity duration-150${i === 0 ? "" : "pointer-events-none opacity-0"}`}
+                >
+                  {(() => {
+                    const img = images?.find((img) => img.position === pos.position && img.imgUrl)
+                    return img ? (
+                      <img
+                        src={`/${img.imgUrl}`}
+                        alt={`${name} ${pos.position}`}
+                        class="h-full w-full object-cover"
+                        loading="lazy"
+                      />
+                    ) : (
+                      <div class="flex h-full w-full items-center justify-center text-sm text-slate-500">No image</div>
+                    )
+                  })()}
                 </div>
               ))}
             </div>
@@ -65,7 +79,7 @@ export function Stigma(props: SelectStigmata) {
         </div>
 
         {/* Right col: skills, vertically centered */}
-        <div class="mx-4 gap-4 flex flex-col justify-center md:ml-2">
+        <div class="mx-4 flex flex-col justify-center gap-4 md:ml-2">
           {positions?.map((pos) => (
             <div class="rounded-lg bg-slate-600/50 p-3">
               <p class="text-base font-medium text-slate-200">{pos.name}</p>

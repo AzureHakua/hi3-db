@@ -1,9 +1,8 @@
 import { Html } from "@elysiajs/html"
 import { Layout } from "../layout"
 import { SearchBar } from "../components/SearchBar"
-import { StigmataList } from "../components"
+import { Stigma, StigmataList } from "../components"
 import { getStigmata } from "../backend/routes"
-import { stigmataPositions, stigmataImages } from "../backend/db/schema"
 
 export const stigmataPage = () => (
   <Layout>
@@ -46,54 +45,19 @@ export const stigmataListPage = async ({ query }: { query: { search?: string; of
   }
 }
 
-export const stigmataPositionPage = async ({ params }: { params: { id: number; index: number } }) => {
+export const stigmataDetailPage = async ({ params }: { params: { id: number } }) => {
   const result = await getStigmata({ query: { id: params.id } })
-  if (result.data.length === 0) return "Stigmata not found"
-
-  const stigma = result.data[0]
-  const pos = stigma.positions[params.index]
-
+  if (!result.data[0])
+    return (
+      <Layout>
+        <p class="text-center">Not found</p>
+      </Layout>
+    )
   return (
-    <>
-      {stigma.positions.map((_: typeof stigmataPositions.$inferSelect, i: number) => (
-        <div id={`icon-${stigma.id}-${i}`} hx-swap-oob="outerHTML">
-          <div
-            data-key={i}
-            class={`relative aspect-[3/1] cursor-pointer rounded-full border-2 transition-all duration-200 ${
-              stigma.positions.length === 1 ? "col-start-2" : ""
-            } ${
-              i === params.index
-                ? "border-violet-400 bg-violet-400/30"
-                : "border-slate-400 bg-slate-600 hover:scale-105 hover:border-slate-100"
-            }`}
-            id={`icon-${stigma.id}-${i}`}
-            hx-get={`/stigmata/${stigma.id}/position/${i}`}
-            hx-target={`#content-container-${stigma.id}`}
-            hx-swap="innerHTML transition:true"
-          >
-            <div
-              class={`absolute flex h-full w-full items-center justify-center rounded-full text-lg font-bold ${
-                i === params.index ? "text-violet-300" : "text-slate-300"
-              }`}
-            >
-              {stigma.positions[i].position}
-            </div>
-          </div>
-        </div>
-      ))}
-      {stigma.images && stigma.images.length > 0 && (
-        <div class="mx-4 flex aspect-square overflow-hidden rounded-none border-2 border-slate-400 md:mx-10">
-          <img
-            src={
-              stigma.images.find((img: typeof stigmataImages.$inferSelect) => img.position === pos.position)?.imgUrl ??
-              ""
-            }
-            alt={`${stigma.name} ${pos.position}`}
-            class="h-full w-full rounded object-cover"
-            loading="lazy"
-          />
-        </div>
-      )}
-    </>
+    <Layout>
+      <div class="3xl:max-w-screen-xl mx-auto my-4 grid w-full max-w-5xl grid-cols-1 gap-4">
+        <Stigma {...result.data[0]} linkable={false} />
+      </div>
+    </Layout>
   )
 }
