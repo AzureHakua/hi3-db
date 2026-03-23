@@ -38,7 +38,7 @@ export function Stigma(props: SelectStigmata & { linkable?: boolean }) {
               {positions?.map((pos, i) => (
                 <div
                   data-image={groupId}
-                  class={`absolute inset-0 transition-opacity duration-150${i === 0 ? "" : " pointer-events-none opacity-0"}`}
+                  class={`absolute inset-0 transition-opacity duration-150 ${i === 0 ? "" : "pointer-events-none opacity-0"}`.trim()}
                 >
                   {(() => {
                     const img = images?.find((img) => img.position === pos.position && img.imgUrl)

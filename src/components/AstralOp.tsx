@@ -106,7 +106,7 @@ export function AstralOp(props: SelectAstralOp & { linkable?: boolean }) {
             {allSkills.map(({ skill }, panelIndex) => (
               <div
                 data-panel={contentGroup}
-                class={`rounded-lg bg-slate-600/50 p-3 transition-opacity duration-150${panelIndex === 0 ? "" : " hidden"}`}
+                class={`rounded-lg bg-slate-600/50 p-3 transition-opacity duration-150 ${panelIndex === 0 ? "" : "hidden"}`.trim()}
               >
                 <div class="mb-2 flex items-center gap-2">
                   <p class="font-medium text-slate-200">{skill.skillName}</p>
