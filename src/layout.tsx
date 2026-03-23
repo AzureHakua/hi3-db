@@ -48,15 +48,21 @@ export const Layout = ({ children }: { children: JSX.Element }) => (
         mq.addEventListener('change', updateSidebar);
         updateSidebar(mq);
 
+        function switchImage(groupId, activeIndex) {
+          document.querySelectorAll('[data-image="' + groupId + '"]').forEach(function(el, i) {
+            el.classList.toggle('opacity-0', i !== activeIndex);
+            el.classList.toggle('pointer-events-none', i !== activeIndex);
+          });
+          document.querySelectorAll('[data-tab="' + groupId + '"]').forEach(function(el, i) {
+            const cls = i === activeIndex ? el.dataset.activeClass : el.dataset.inactiveClass;
+            if (cls) el.className = cls;
+          });
+        }
+
         function switchTab(groupId, activeIndex) {
           document.querySelectorAll('[data-panel="' + groupId + '"]').forEach(function(el, i) {
-            if (i === activeIndex) {
-              el.classList.remove('opacity-0', 'pointer-events-none');
-            } else {
-              el.classList.add('opacity-0', 'pointer-events-none');
-            }
+            el.classList.toggle('hidden', i !== activeIndex);
           });
-
           document.querySelectorAll('[data-tab="' + groupId + '"]').forEach(function(el, i) {
             const cls = i === activeIndex ? el.dataset.activeClass : el.dataset.inactiveClass;
             if (cls) el.className = cls;

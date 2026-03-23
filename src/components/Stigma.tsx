@@ -28,10 +28,7 @@ export function Stigma(props: SelectStigmata) {
             {/* Image panels stacked, opacity switched */}
             <div class="relative aspect-square overflow-hidden rounded-t-lg border-2 border-b-0 border-slate-400">
               {positions?.map((pos, i) => (
-                <div
-                  data-panel={groupId}
-                  class={`absolute inset-0 transition-opacity duration-150${i === 0 ? "" : "pointer-events-none opacity-0"}`}
-                >
+                <div data-image={groupId} class={`absolute inset-0 transition-opacity duration-150${i === 0 ? "" : " opacity-0 pointer-events-none"}`}>
                   {bigImages?.find((img) => img.position === pos.position) ? (
                     <img
                       src={bigImages.find((img) => img.position === pos.position)!.imgUrl ?? ""}
@@ -55,7 +52,7 @@ export function Stigma(props: SelectStigmata) {
                     data-active-class={ACTIVE_TAB(i)}
                     data-inactive-class={INACTIVE_TAB(i)}
                     class={i === 0 ? ACTIVE_TAB(i) : INACTIVE_TAB(i)}
-                    onclick={`switchTab('${groupId}', ${i})`}
+                    onclick={`switchImage('${groupId}', ${i})`}
                   >
                     {pos.position}
                   </div>

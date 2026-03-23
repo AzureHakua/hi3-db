@@ -32,7 +32,7 @@ export function AstralOp(props: SelectAstralOp) {
 
       <div class="flex flex-col md:grid md:grid-cols-2">
         {/* Left col: image */}
-        <div class="mx-4 mb-4 mt-3 flex justify-center">
+        <div class="mx-4 mb-4 mt-3 flex self-start justify-center">
           {imgUrl && (
             <div class="flex aspect-square w-full overflow-hidden rounded border-2 border-slate-400">
               <img src={imgUrl} alt={name} class="h-full w-full object-cover" loading="lazy" />
@@ -97,7 +97,7 @@ export function AstralOp(props: SelectAstralOp) {
             {allSkills.map(({ skill }, panelIndex) => (
               <div
                 data-panel={contentGroup}
-                class={`rounded-lg bg-slate-600/50 p-3 transition-opacity duration-150${panelIndex === 0 ? "" : "pointer-events-none absolute inset-0 opacity-0"}`}
+                class={`rounded-lg bg-slate-600/50 p-3 transition-opacity duration-150${panelIndex === 0 ? "" : " hidden"}`}
               >
                 <div class="mb-2 flex items-center gap-2">
                   <p class="font-medium text-slate-200">{skill.skillName}</p>
