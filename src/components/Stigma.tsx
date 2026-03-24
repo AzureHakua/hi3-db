@@ -41,11 +41,11 @@ export function Stigma(props: SelectStigmata & { linkable?: boolean }) {
                   class={`absolute inset-0 transition-opacity duration-150 ${i === 0 ? "" : "pointer-events-none opacity-0"}`.trim()}
                 >
                   {(() => {
-                    const img = images?.find((img) => img.position === pos.position && img.imgUrl)
-                    return img ? (
+                    const img = images?.[i]
+                    return img?.imgUrl ? (
                       <img
                         src={`/${img.imgUrl}`}
-                        alt={`${name} ${pos.position}`}
+                        alt={`${name} ${pos.name}`}
                         class="h-full w-full object-cover"
                         loading="lazy"
                       />
@@ -79,7 +79,7 @@ export function Stigma(props: SelectStigmata & { linkable?: boolean }) {
         </div>
 
         {/* Right col: skills, vertically centered */}
-        <div class="mx-4 flex flex-col justify-center gap-4 md:ml-2">
+        <div class="mx-4 mb-4 flex flex-col justify-center gap-4 md:ml-2 md:mt-3">
           {positions?.map((pos) => (
             <div class="rounded-lg bg-slate-600/50 p-3">
               <p class="text-base font-medium text-slate-200">{pos.name}</p>
