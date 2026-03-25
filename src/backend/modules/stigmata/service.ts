@@ -109,14 +109,14 @@ export const getStigmata = async ({ query }: { query: any }) => {
       .select()
       .from(stigmata)
       .where(like(stigmata.name, `%${flags.name}%`))
-      .orderBy(desc(stigmata.id))
+      .orderBy(stigmata.name)
       .limit(fetchAll ? 999 : limit)
       .offset(fetchAll ? 0 : offset)
   } else {
     stigmataData = await db
       .select()
       .from(stigmata)
-      .orderBy(desc(stigmata.id))
+      .orderBy(stigmata.name)
       .limit(fetchAll ? 999 : limit + 1)
       .offset(fetchAll ? 0 : offset)
       .all()

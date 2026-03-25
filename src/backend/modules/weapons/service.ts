@@ -12,6 +12,7 @@ export const getWeapon = async ({ query }: { query: any }) => {
       .select()
       .from(weapon)
       .where(like(weapon.name, `%${searchTerm}%`))
+      .orderBy(weapon.name)
       .limit(limit)
   } else if (query.name) {
     const searchTerm = query.name.replace(/\+/g, " ")
@@ -19,6 +20,7 @@ export const getWeapon = async ({ query }: { query: any }) => {
       .select()
       .from(weapon)
       .where(like(weapon.name, `%${searchTerm}%`))
+      .orderBy(weapon.name)
       .limit(limit)
   } else if (query.id) {
     weaponData = await db
@@ -26,7 +28,7 @@ export const getWeapon = async ({ query }: { query: any }) => {
       .from(weapon)
       .where(eq(weapon.id, Number(query.id)))
   } else {
-    weaponData = await db.select().from(weapon).limit(limit).all()
+    weaponData = await db.select().from(weapon).orderBy(weapon.name).limit(limit).all()
   }
 
   const fullData = await Promise.all(

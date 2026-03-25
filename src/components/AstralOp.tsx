@@ -44,7 +44,7 @@ export function AstralOp(props: SelectAstralOp & { linkable?: boolean }) {
         <div class="mx-4 mb-4 mt-3 flex justify-center self-start">
           {imgUrl && (
             <div class="flex aspect-square w-full overflow-hidden rounded border-2 border-slate-400">
-              <img src={`/${imgUrl}`} alt={name} class="h-full w-full object-cover" loading="lazy" width="400" height="400" />
+              <img src={`/${imgUrl}`} alt={name} class="h-full w-full object-cover" />
             </div>
           )}
         </div>
