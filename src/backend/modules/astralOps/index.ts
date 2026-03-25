@@ -2,6 +2,7 @@ import { Elysia, t } from "elysia"
 import { astralOpModel, astralOpBody, skillBody } from "./model"
 import { getAstralOp, postAstralOp, patchAstralOp, deleteAstralOp } from "./service"
 import { checkAuth } from "../../utils/auth"
+import { ELEMENTS, SPECIALIZATIONS, SPECIALIZATION_TAGS } from "../../db/enums"
 
 export const astralOpRoutes = new Elysia({ prefix: "/api", tags: ["AstralOps"], detail: { hide: false } })
   .use(astralOpModel)
@@ -50,11 +51,11 @@ export const astralOpRoutes = new Elysia({ prefix: "/api", tags: ["AstralOps"], 
         t.Object({
           name: t.String(),
           imgUrl: t.String(),
-          damage: t.String(),
+          element: t.UnionEnum(ELEMENTS, { error: "Invalid element type" }),
           specializations: t.Array(
             t.Object({
-              spName: t.String(),
-              spTag: t.String(),
+              spName: t.UnionEnum(SPECIALIZATIONS, { error: "Invalid specialization" }),
+              spTag: t.UnionEnum(SPECIALIZATION_TAGS, { error: "Invalid specialization tag" }),
             }),
           ),
           skills: t.Object({

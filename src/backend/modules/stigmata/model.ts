@@ -1,4 +1,5 @@
 import { Elysia, t } from "elysia"
+import { RARITIES } from "../../db/enums"
 
 // Stats shape used in positions
 const statsBody = t.Object({
@@ -23,6 +24,7 @@ const setEffectsBody = t.Partial(
 // Full stigmata body
 export const stigmataBody = t.Object({
   name: t.String({ error: "Stigmata name is required" }),
+  rarity: t.UnionEnum(RARITIES, {error: "Rarity must be 1-5"}),
   positions: t.Optional(
     t.Array(
       t.Object({

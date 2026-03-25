@@ -1,7 +1,9 @@
 import { Elysia, t } from "elysia"
+import { RARITIES } from "../../db/enums"
 
 export const weaponBody = t.Object({
   name: t.String({ error: "Weapon name is required" }),
+  rarity: t.UnionEnum(RARITIES, { error: "Rarity must be 1-5" }),
   atk: t.Number({ error: "ATK must be a number" }),
   crt: t.Number({ error: "CRT must be a number" }),
   baseUrl: t.String({
@@ -20,6 +22,7 @@ export const weaponBody = t.Object({
       }),
     ),
   ),
+  lore: t.Optional(t.String()),
 })
 
 export const weaponModel = new Elysia().model({

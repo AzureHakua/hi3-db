@@ -2,6 +2,7 @@ import { Elysia, t } from "elysia"
 import { stigmataModel, stigmataBody } from "./model"
 import { getStigmata, postStigmata, patchStigmata, deleteStigmata } from "./service"
 import { checkAuth } from "../../utils/auth"
+import { RARITIES } from "../../db/enums"
 
 export const stigmataRoutes = new Elysia({ prefix: "/api", tags: ["Stigmata"], detail: { hide: false } })
   .use(stigmataModel)
@@ -68,10 +69,12 @@ export const stigmataRoutes = new Elysia({ prefix: "/api", tags: ["Stigmata"], d
       body: t.Partial(
         t.Object({
           name: t.String(),
+          rarity: t.UnionEnum(RARITIES, { error: "Rarity must be 1-5" }),
           positions: t.Array(
             t.Object({
               position: t.UnionEnum(["T", "M", "B"], {
                 description: "Required to know which position to update",
+                error: "Position must be T, M, or B",
               }),
               ...t.Partial(
                 t.Object({
@@ -95,6 +98,7 @@ export const stigmataRoutes = new Elysia({ prefix: "/api", tags: ["Stigmata"], d
             t.Object({
               position: t.UnionEnum(["T", "M", "B"], {
                 description: "Required to know which position's image to update",
+                error: "Position must be T, M, or B",
               }),
               imgUrl: t.String(),
             }),

@@ -61,7 +61,7 @@ export const postAstralOp = async ({ body }: { body: any }) => {
   return await db.transaction(async (tx) => {
     const astralOpResult = await tx
       .insert(astralop)
-      .values({ name: body.name, imgUrl: body.imgUrl, damage: body.damage })
+      .values({ name: body.name, imgUrl: body.imgUrl, element: body.element })
       .returning()
       .get()
 
@@ -87,7 +87,6 @@ export const postAstralOp = async ({ body }: { body: any }) => {
               skillName: skill.skillName,
               skillDescription: skill.skillDescription,
               unlock: skill.unlock,
-              imgUrl: skill.imgUrl || null,
             })
           })
         }
@@ -109,7 +108,7 @@ export const patchAstralOp = async ({ params, body }: { params: { id: number }; 
     const updateData: any = {}
     if (body.name !== undefined) updateData.name = body.name
     if (body.imgUrl !== undefined) updateData.imgUrl = body.imgUrl
-    if (body.damage !== undefined) updateData.damage = body.damage
+    if (body.element !== undefined) updateData.element = body.element
 
     if (Object.keys(updateData).length > 0) {
       await tx.update(astralop).set(updateData).where(eq(astralop.id, params.id))
@@ -146,7 +145,6 @@ export const patchAstralOp = async ({ params, body }: { params: { id: number }; 
               if (skill.skillName !== undefined) skillUpdateData.skillName = skill.skillName
               if (skill.skillDescription !== undefined) skillUpdateData.skillDescription = skill.skillDescription
               if (skill.unlock !== undefined) skillUpdateData.unlock = skill.unlock
-              if (skill.imgUrl !== undefined) skillUpdateData.imgUrl = skill.imgUrl
 
               if (Object.keys(skillUpdateData).length > 0) {
                 await tx.update(astralOpSkills).set(skillUpdateData).where(eq(astralOpSkills.id, existingSkill.id))

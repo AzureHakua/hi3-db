@@ -4,7 +4,7 @@ import { getEntityCounts } from "../backend/db/counts"
 
 export const homePage = async () => {
   // Gets database counts to display on homepage
-  const { weaponCount, stigmataCount, astralOpCount } = await getEntityCounts()
+  const { valkyrieCount, weaponCount, stigmataCount, astralOpCount } = await getEntityCounts()
 
   return (
     <Layout>
@@ -51,7 +51,7 @@ export const homePage = async () => {
 
         <div class="mx-auto mt-4 flex max-w-3xl justify-center gap-2 rounded-xl border border-slate-600 bg-slate-700 px-2 py-3 sm:mt-6 sm:gap-8 sm:px-4 sm:py-4">
           <div class="text-center">
-            <p class="text-base font-bold text-slate-200 sm:text-2xl">WIP</p>
+            <p class="text-base font-bold text-slate-200 sm:text-2xl">{valkyrieCount?.count ?? 0}</p>
             <p class="text-sm text-slate-400">Valkyries</p>
           </div>
           <div class="w-px bg-slate-600"></div>

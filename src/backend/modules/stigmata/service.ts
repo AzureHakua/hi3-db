@@ -157,7 +157,7 @@ export const postStigmata = async ({ body }: { body: any }) => {
   if (!body.name) throw new Error("Stigmata name is required")
 
   return await db.transaction(async (tx) => {
-    const stigmataResult = await tx.insert(stigmata).values({ name: body.name }).returning().get()
+    const stigmataResult = await tx.insert(stigmata).values({ name: body.name, rarity: body.rarity }).returning().get()
 
     if (body.positions) {
       for (const pos of body.positions) {
@@ -207,8 +207,12 @@ export const patchStigmata = async ({ params, body }: { params: { id: number }; 
     const stigmataResult = await tx.select().from(stigmata).where(eq(stigmata.id, params.id)).get()
     if (!stigmataResult) throw new Error("Stigmata not found")
 
-    if (body.name) {
-      await tx.update(stigmata).set({ name: body.name }).where(eq(stigmata.id, params.id))
+    const updateData: any = {}
+    if (body.name !== undefined) updateData.name = body.name
+    if (body.rarity !== undefined) updateData.rarity = body.rarity
+
+    if (Object.keys(updateData).length > 0) {
+      await tx.update(stigmata).set(updateData).where(eq(stigmata.id, params.id))
     }
 
     if (body.positions) {

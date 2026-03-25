@@ -7,7 +7,7 @@ const INACTIVE_NODE =
   "flex h-7 w-7 cursor-pointer items-center justify-center rounded-full border-2 border-slate-400 bg-slate-600 text-xs font-bold text-slate-300 transition-all duration-200 hover:scale-105 hover:border-slate-100 md:h-8 md:w-8"
 
 export function AstralOp(props: SelectAstralOp & { linkable?: boolean }) {
-  const { id, name, imgUrl, damage, specializations, skills, linkable = true } = props
+  const { id, name, imgUrl, element, specializations, skills, linkable = true } = props
   const { synergy, recharge, passive } = skills
 
   const categories = [
@@ -44,7 +44,7 @@ export function AstralOp(props: SelectAstralOp & { linkable?: boolean }) {
         <div class="mx-4 mb-4 mt-3 flex justify-center self-start">
           {imgUrl && (
             <div class="flex aspect-square w-full overflow-hidden rounded border-2 border-slate-400">
-              <img src={`/${imgUrl}`} alt={name} class="h-full w-full object-cover" loading="lazy" />
+              <img src={`/${imgUrl}`} alt={name} class="h-full w-full object-cover" loading="lazy" width="400" height="400" />
             </div>
           )}
         </div>
@@ -85,8 +85,8 @@ export function AstralOp(props: SelectAstralOp & { linkable?: boolean }) {
 
             {/* Traits */}
             <div class="mt-4 text-right">
-              <p class="mb-1 text-xs uppercase tracking-wide text-slate-400">Damage Type</p>
-              <p class="mb-3 font-medium capitalize text-slate-200">{damage}</p>
+              <p class="mb-1 text-xs uppercase tracking-wide text-slate-400">Element Type</p>
+              <p class="mb-3 font-medium capitalize text-slate-200">{element}</p>
               {(specializations?.length ?? 0) > 0 && (
                 <div>
                   <p class="mb-1 text-xs uppercase tracking-wide text-slate-400">AR Specialization</p>

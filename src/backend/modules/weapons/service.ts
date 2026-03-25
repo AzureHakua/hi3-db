@@ -47,10 +47,12 @@ export const postWeapon = async ({ body }: { body: any }) => {
       .insert(weapon)
       .values({
         name: body.name,
+        rarity: body.rarity,
         atk: body.atk,
         crt: body.crt,
         baseUrl: body.baseUrl,
         maxUrl: body.maxUrl,
+        lore: body.lore || null,
       })
       .returning()
       .get()
@@ -76,10 +78,12 @@ export const patchWeapon = async ({ params, body }: { params: { id: number }; bo
 
     const updateData: any = {}
     if (body.name !== undefined) updateData.name = body.name
+    if (body.rarity !== undefined) updateData.rarity = body.rarity
     if (body.atk !== undefined) updateData.atk = body.atk
     if (body.crt !== undefined) updateData.crt = body.crt
     if (body.baseUrl !== undefined) updateData.baseUrl = body.baseUrl
     if (body.maxUrl !== undefined) updateData.maxUrl = body.maxUrl
+    if (body.lore !== undefined) updateData.lore = body.lore
 
     if (Object.keys(updateData).length > 0) {
       await tx.update(weapon).set(updateData).where(eq(weapon.id, params.id))

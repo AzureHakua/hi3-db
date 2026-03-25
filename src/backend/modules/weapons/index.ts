@@ -2,6 +2,7 @@ import { Elysia, t } from "elysia"
 import { weaponModel, weaponBody } from "./model"
 import { getWeapon, postWeapon, patchWeapon, deleteWeapon } from "./service"
 import { checkAuth } from "../../utils/auth"
+import { RARITIES } from "../../db/enums"
 
 export const weaponRoutes = new Elysia({ prefix: "/api", tags: ["Weapons"], detail: { hide: false } })
   .use(weaponModel)
@@ -48,6 +49,7 @@ export const weaponRoutes = new Elysia({ prefix: "/api", tags: ["Weapons"], deta
       body: t.Partial(
         t.Object({
           name: t.String(),
+          rarity: t.UnionEnum(RARITIES, { error: "Rarity must be 1-5" }),
           atk: t.Number(),
           crt: t.Number(),
           baseUrl: t.String({ description: "Base form of the weapon" }),
@@ -63,6 +65,7 @@ export const weaponRoutes = new Elysia({ prefix: "/api", tags: ["Weapons"], deta
               skillDescription: t.Optional(t.String()),
             }),
           ),
+          lore: t.String(),
         }),
       ),
       headers: t.Object({ authorization: t.String() }),
