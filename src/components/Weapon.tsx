@@ -29,7 +29,7 @@ export function Weapon(props: SelectWeapon & { linkable?: boolean }) {
             <img
               src={`/${maxUrl}`}
               alt={name}
-              class="max-w-full rounded border-2 border-slate-400 object-contain"
+              class="max-w-full rounded-lg border-2 border-slate-400 object-contain"
               loading="lazy"
             />
           )}
