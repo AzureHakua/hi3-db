@@ -5,9 +5,9 @@ import { tailwind } from "@gtramontina.com/elysia-tailwind"
 import { openapi } from "@elysiajs/openapi"
 import "./styles/tailwind.css"
 
-import { stigmataRoutes, weaponRoutes, astralOpRoutes } from "./backend/modules"
+import { valkyrieRoutes, characterRoutes, stigmataRoutes, weaponRoutes, astralOpRoutes } from "./backend/modules"
 import { homePage } from "./pages/Home"
-import { valkyriesPage } from "./pages/Valkyries"
+import { valkyriesPage, valkyriesListPage, valkyriesDetailPage } from "./pages/Valkyries"
 import { weaponsPage, weaponsListPage, weaponsDetailPage } from "./pages/Weapons"
 import { stigmataPage, stigmataListPage, stigmataDetailPage } from "./pages/Stigmata"
 import { astralOpsPage, astralOpsListPage, astralOpsDetailPage } from "./pages/AstralOps"
@@ -49,14 +49,18 @@ const app = new Elysia({
           },
         },
         tags: [
-          { name: "Stigmata", description: "Stigmata equipment data" },
+          { name: "Valkyries", description: "Valkyrie data" },
+          { name: "Characters", description: "Character data" },
           { name: "Weapons", description: "Weapon data" },
+          { name: "Stigmata", description: "Stigmata equipment data" },
           { name: "AstralOps", description: "AstralOp data" },
         ],
       },
       path: "/openapi",
     }),
   )
+  .use(valkyrieRoutes)
+  .use(characterRoutes)
   .use(stigmataRoutes)
   .use(weaponRoutes)
   .use(astralOpRoutes)
@@ -65,8 +69,14 @@ const app = new Elysia({
   .get("/js/*", ({ params }) => file(`public/js/${params["*"]}`))
   .get("/", homePage)
   .get("/valkyries", valkyriesPage)
+  .get("/valkyries-list", valkyriesListPage, {
+    query: t.Object({ search: t.Optional(t.String()) }),
+  })
+  .get("/valkyries/:id", valkyriesDetailPage, {
+    params: t.Object({ id: t.Numeric() }),
+  })
   .get("/weapons", weaponsPage)
-  .get("/weapon-list", weaponsListPage, {
+  .get("/weapons-list", weaponsListPage, {
     query: t.Object({ search: t.Optional(t.String()) }),
   })
   .get("/weapons/:id", weaponsDetailPage, {

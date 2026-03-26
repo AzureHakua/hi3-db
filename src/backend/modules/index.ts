@@ -1,3 +1,5 @@
 export { stigmataRoutes, getStigmata } from "./stigmata"
 export { weaponRoutes, getWeapon } from "./weapons"
 export { astralOpRoutes, getAstralOp } from "./astralOps"
+export { valkyrieRoutes, getValkyrie } from "./valkyries"
+export { characterRoutes, getCharacter } from "./characters"

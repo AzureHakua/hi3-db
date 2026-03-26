@@ -11,7 +11,7 @@ export const weaponsPage = () => (
       <SearchBar placeholder="Search weapons..." target="weapon-list" endpoint="/weapon-list" />
       <div
         id="weapon-list"
-        hx-get="/weapon-list"
+        hx-get="/weapons-list"
         hx-trigger="load"
         hx-target="#weapon-list"
         hx-swap="innerHTML transition:true"

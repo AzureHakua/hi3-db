@@ -2,7 +2,7 @@ import { Html } from "@elysiajs/html"
 import { SelectWeapon } from "../backend/db/schema"
 
 export function Weapon(props: SelectWeapon & { linkable?: boolean }) {
-  const { id, name, atk, crt, baseUrl, maxUrl, skills, linkable = true } = props
+  const { id, name, atk, crt, maxUrl, skills, linkable = true } = props
   const firstSkill = skills?.[0]
   const restSkills = skills?.slice(1) ?? []
 

@@ -1,3 +1,5 @@
+export { Valkyrie } from "./Valkyrie"
+export { ValkyrieList } from "./ValkyrieList"
 export { Weapon } from "./Weapon"
 export { WeaponList } from "./WeaponList"
 export { Stigma } from "./Stigma"

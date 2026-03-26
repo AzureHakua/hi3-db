@@ -1,6 +1,6 @@
 import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core"
 
-// Valkyrie schemas start ehre
+// valkyrie schemas start ehre
 // Character table
 export const character = sqliteTable("character", {
   id: integer("id").primaryKey({ autoIncrement: true }),
@@ -10,7 +10,9 @@ export const character = sqliteTable("character", {
 // Core valkyrie table
 export const valkyrie = sqliteTable("valkyrie", {
   id: integer("id").primaryKey({ autoIncrement: true }),
-  characterId: integer("character_id").notNull().references(() => character.id),
+  characterId: integer("character_id")
+    .notNull()
+    .references(() => character.id),
   name: text("name").notNull(),
   rank: text("rank").notNull(),
   type: text("type").notNull(),
@@ -21,28 +23,36 @@ export const valkyrie = sqliteTable("valkyrie", {
 // Specialization — 0 or 1 per valkyrie
 export const valkyrieSpecialization = sqliteTable("valkyrie_specialization", {
   id: integer("id").primaryKey({ autoIncrement: true }),
-  valkyrieId: integer("valkyrie_id").notNull().references(() => valkyrie.id),
+  valkyrieId: integer("valkyrie_id")
+    .notNull()
+    .references(() => valkyrie.id),
   spName: text("sp_name").notNull(),
 })
 
 // Specialization tags — 1 or more per specialization
 export const valkyrieSpecializationTags = sqliteTable("valkyrie_specialization_tags", {
   id: integer("id").primaryKey({ autoIncrement: true }),
-  specializationId: integer("specialization_id").notNull().references(() => valkyrieSpecialization.id),
+  specializationId: integer("specialization_id")
+    .notNull()
+    .references(() => valkyrieSpecialization.id),
   spTag: text("sp_tag").notNull(),
 })
 
 // Strengths — 1 or more per valkyrie
 export const valkyrieStrengths = sqliteTable("valkyrie_strengths", {
   id: integer("id").primaryKey({ autoIncrement: true }),
-  valkyrieId: integer("valkyrie_id").notNull().references(() => valkyrie.id),
+  valkyrieId: integer("valkyrie_id")
+    .notNull()
+    .references(() => valkyrie.id),
   strength: text("strength").notNull(),
 })
 
 // Skills
 export const valkyrieSkills = sqliteTable("valkyrie_skills", {
   id: integer("id").primaryKey({ autoIncrement: true }),
-  valkyrieId: integer("valkyrie_id").notNull().references(() => valkyrie.id),
+  valkyrieId: integer("valkyrie_id")
+    .notNull()
+    .references(() => valkyrie.id),
   category: text("category").notNull(),
   skillOrder: integer("skill_order").notNull(),
   skillName: text("skill_name").notNull(),
@@ -53,7 +63,9 @@ export const valkyrieSkills = sqliteTable("valkyrie_skills", {
 // Costumes
 export const valkyrieCostumes = sqliteTable("valkyrie_costumes", {
   id: integer("id").primaryKey({ autoIncrement: true }),
-  valkyrieId: integer("valkyrie_id").notNull().references(() => valkyrie.id),
+  valkyrieId: integer("valkyrie_id")
+    .notNull()
+    .references(() => valkyrie.id),
   name: text("name").notNull(),
   imgUrl: text("img_url").notNull(),
   rarity: integer("rarity").notNull().default(4),
@@ -69,7 +81,17 @@ export type SelectValkyrie = typeof valkyrie.$inferSelect & {
     tags: typeof valkyrieSpecializationTags.$inferSelect[]
   }) | null
   strengths: typeof valkyrieStrengths.$inferSelect[]
-  skills: typeof valkyrieSkills.$inferSelect[]
+  skills: {
+    leader: typeof valkyrieSkills.$inferSelect[]
+    passive: typeof valkyrieSkills.$inferSelect[]
+    evasion: typeof valkyrieSkills.$inferSelect[]
+    basicAtk: typeof valkyrieSkills.$inferSelect[]
+    ultimate: typeof valkyrieSkills.$inferSelect[]
+    specialAtk: typeof valkyrieSkills.$inferSelect[]
+    spSkill: typeof valkyrieSkills.$inferSelect[]
+    weaponSkill: typeof valkyrieSkills.$inferSelect[]
+    astralRing: typeof valkyrieSkills.$inferSelect[]
+  }
   costumes: typeof valkyrieCostumes.$inferSelect[]
 }
 
